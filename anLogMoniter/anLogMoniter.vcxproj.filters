@@ -24,6 +24,15 @@
     <ClInclude Include="targetver.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="uvloop.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="an_nocopyable.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="anlog.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

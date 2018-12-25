@@ -71,12 +71,16 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>D:\MyTest\2018_C++\anLogTraced\deps\include;$(IncludePath)</IncludePath>
+    <ReferencePath>D:\MyTest\2018_C++\anLogTraced\deps\lib;$(ReferencePath)</ReferencePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>D:\MyTest\2018_C++\anLogTraced\deps\include;$(IncludePath)</IncludePath>
+    <ReferencePath>D:\MyTest\2018_C++\anLogTraced\deps\lib;$(ReferencePath)</ReferencePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -145,8 +149,11 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="anlog.h" />
+    <ClInclude Include="an_nocopyable.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="uvloop.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="anLogMoniter.cpp" />
