@@ -33,12 +33,21 @@
     <ClInclude Include="anlog.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="anDirMonitor.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="an_voidify.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="anLogMoniter.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="anDirMonitor.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

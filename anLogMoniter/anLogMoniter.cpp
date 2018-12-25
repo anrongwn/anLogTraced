@@ -2,7 +2,9 @@
 //
 
 #include "stdafx.h"
+#include <iostream>
 #include "uvloop.h"
+#include "anDirMonitor.h"
 
 
 #ifdef _DEBUG
@@ -17,6 +19,9 @@ int main()
 {
 	g_log->info("main starting...");
 
+	anDirMonitor dm(g_loop.get());
+	dm.start(R"(D:\MyTest\2018_C++\anLogTraced\anLogMoniter\logs)");
+	
     return g_loop.run();
 }
 
