@@ -21,27 +21,7 @@ struct an_fs_event : public uv_fs_event_t {
 
 struct dmHandler {
 	void operator()(uv_fs_event_t* handle, const char* filename, \
-		int events, int status) {
-
-		std::stringstream log;
-		log << fmt::format("dmHandler(handle={:#08x} filename={}, events={}, status={})", \
-			 (int)handle, filename, events, status);
-
-		if (status) {
-			return;
-		}
-
-		switch (events) {
-		case UV_CHANGE:
-			break;
-		case UV_RENAME:	//
-			break;
-		default:
-			break;
-		}
-
-		g_log->info("{}", log.str());
-	}
+		int events, int status);
 };
 
 class anDirMonitor : an::NoCopyable
