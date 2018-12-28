@@ -24,7 +24,10 @@
     <ClInclude Include="targetver.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="anDirMonitor.h">
+    <ClInclude Include="anMee.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="anHandler.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -32,10 +35,13 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="anLogMoniter.cpp">
+    <ClCompile Include="anMessageEngine.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="anDirMonitor.cpp">
+    <ClCompile Include="anMee.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="anHandler.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

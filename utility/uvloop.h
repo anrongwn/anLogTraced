@@ -26,10 +26,7 @@ public:
 	*/
 	~uvloop()
 	{
-		if (uv_loop_.get())
-		{
-			uv_loop_close(uv_loop_.get());
-		}
+		close();
 	}
 
 	uvloop(uvloop&& other)
@@ -52,19 +49,30 @@ public:
 		return uv_loop_.get();
 	}
 
-	bool run()
+	int close() {
+		int r = 0;
+		uv_loop_t * tmp = uv_loop_.get();
+		if (tmp)
+		{
+			r = uv_loop_close(tmp);
+		}
+
+		return r;
+	}
+	
+	int run()
 	{
-		return uv_run(uv_loop_.get(), UV_RUN_DEFAULT) == 0;
+		return uv_run(uv_loop_.get(), UV_RUN_DEFAULT);
 	}
 
-	bool run_once()
+	int run_once()
 	{
-		return uv_run(uv_loop_.get(), UV_RUN_ONCE) == 0;
+		return uv_run(uv_loop_.get(), UV_RUN_ONCE);
 	}
 
-	bool run_nowait()
+	int run_nowait()
 	{
-		return uv_run(uv_loop_.get(), UV_RUN_NOWAIT) == 0;
+		return uv_run(uv_loop_.get(), UV_RUN_NOWAIT);
 	}
 
 	

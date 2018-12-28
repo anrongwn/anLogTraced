@@ -19,9 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{A40973BF-C582-4996-8B52-CFD6FC4E8324}</ProjectGuid>
+    <ProjectGuid>{BAFFB9C6-5B15-4278-B383-76143E05C904}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>anLogMoniter</RootNamespace>
+    <RootNamespace>anMessageEngine</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -149,13 +149,15 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="anDirMonitor.h" />
+    <ClInclude Include="anHandler.h" />
+    <ClInclude Include="anMee.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="anDirMonitor.cpp" />
-    <ClCompile Include="anLogMoniter.cpp" />
+    <ClCompile Include="anHandler.cpp" />
+    <ClCompile Include="anMee.cpp" />
+    <ClCompile Include="anMessageEngine.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

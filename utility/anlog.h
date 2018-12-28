@@ -8,13 +8,17 @@
 #include <memory>
 
 namespace anlog {
-	const char * logname = R"(anLogMoniter)";
-	const char * logpath = R"(logs/anLogMoniter.log)";
+	//const char * logname = R"(anLogMoniter)";
+	//const char * logpath = R"(logs/anLogMoniter.log)";
 	using logger = std::shared_ptr<spdlog::logger>;
 	static logger g_anlog;
 
-	logger& init() {
+	logger& init(const char* logname) {
 		if (!g_anlog) {
+			std::string logpath(R"(logs/)");
+			logpath+=logname;
+			logpath+=".log";
+			
 			spdlog::init_thread_pool(65536, 1);
 			g_anlog = spdlog::daily_logger_mt<spdlog::async_factory>(logname, logpath);
 
@@ -25,7 +29,7 @@ namespace anlog {
 		return g_anlog;
 	}
 
-	void close() {
+	void close(const char* logname) {
 		spdlog::drop(logname);
 	}
 
