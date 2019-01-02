@@ -12,13 +12,16 @@ uvloop *anMee::s_loop_ = new uvloop(true);
 
 anMee::anMee()
 {
-	notify_.data = this;
 }
-
 
 anMee::~anMee()
 {
 	stop();
+
+	if (s_loop_) {
+		delete s_loop_;
+		s_loop_ = nullptr;
+	}
 }
 
 void anMee::start() {
@@ -37,54 +40,45 @@ void anMee::stop() {
 void anMee::push(const char*data, size_t len) {
 	lock lk(mtx_);
 
-	raw_data_q_.emplace(std::string(data, len));
+	raw_data_v_.insert(raw_data_v_.end(), data, data + len);
 
 	g_log->info("anMee::push({})", std::string(data, len));
 
 	emit();
 }
 
-anMee::queue::reference anMee::front() {
-	lock lk(mtx_);
-
-	return raw_data_q_.front();
-}
-
-void anMee::pop() {
-	lock lk(mtx_);
-
-	raw_data_q_.pop();
-}
 
 void anMee::emit() {
 	if (s_loop_->get()) {
-		uv_async_init(s_loop_->get(), &notify_, anMee::notify_handler);
+		an_async_req *async = new an_async_req(this);
+		uv_async_init(s_loop_->get(), async, anMee::notify_handler);
 
-		uv_async_send(&notify_);
+		uv_async_send(async);
 	}
 }
 
-std::string anMee::getRawData() {
+size_t anMee::getRawData(raw_buffer &raw) {
 	lock lk(mtx_);
 
-	std::stringstream out;
-	while (!raw_data_q_.empty()) {
-		out << raw_data_q_.front();
-		raw_data_q_.pop();
-	}
+	raw_data_v_.swap(raw);
 
-	return out.str();
+	return raw.size();
 }
 
-static size_t lv_len = sizeof(size_t);//包长度标识
+
+#define lv_len sizeof(size_t)
+
 void anMee::notify_handler(uv_async_t* handle) {
-	static std::string laster;
+	static raw_buffer laster;
 	anMee * that = static_cast<anMee*>(handle->data);
 
-	std::string data;
-	data += laster;
-	data += that->getRawData();
+	raw_buffer data(laster), tmp;
+	size_t raw_len = that->getRawData(tmp);
 	laster.clear();
+	if (raw_len) {
+		data.insert(data.end(), tmp.begin(), tmp.end());
+		raw_len = data.size();
+	}
 
 	/*//包格式为
 		|length|value|
@@ -92,30 +86,39 @@ void anMee::notify_handler(uv_async_t* handle) {
 	*/
 	//获取包实际长度
 	while (true) {
-		if (data.length() < lv_len) break;
+		if (raw_len < lv_len) break;
 
-		std::string slen = data.substr(0, lv_len);
-		size_t package_len = std::stoi(slen);
+		u_len slen;
+		memcpy(&slen.x, data.data(), lv_len);
+		
 		
 		//不是完整的包
-		size_t sum_len = data.length();
-		if (package_len > sum_len) break;
+		if (slen.x > (raw_len-lv_len)) break;
 
 		//取包
-		std::string package = data.substr(lv_len, package_len);
-		data.erase(0, lv_len + package_len);
+		raw_buffer package;
+		package.insert(package.end(), data.begin() + lv_len, data.end());
+		data.erase(data.begin(), data.begin() + lv_len + slen.x);
+		raw_len = data.size();
 
 		//回调，返回完整的包
-		anMee::message_handler(package.length(), package.c_str());
+		anMee::message_handler(package.size(), package.data());
 	}
 	
 	//保存不完整的包
 	laster = std::move(data);
+
+	uv_close((uv_handle_t*)handle, anMee::close_cb);
+}
+void anMee::close_cb(uv_handle_t* handle) {
+	if (handle->type == UV_ASYNC) {
+		delete handle;
+	}
 }
 int anMee::message_handler(size_t len, const char* message) {
 	int r = 0;
 
-	g_log->info("anMee::message_handler(len={}, message={})={}", len, message, r);
+	g_log->info("anMee::message_handler(len={}, message={})={}", len, std::string(message, len), r);
 
 	return r;
 }
@@ -129,7 +132,7 @@ void anMee::thread_func(void * lp) {
 
 	int more = 0;
 	while (that->flag_) {
-		more = s_loop_->run_once();
+		more = s_loop_->run_nowait();
 		if (more) continue;
 	}
 
