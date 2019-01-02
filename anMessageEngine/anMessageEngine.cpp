@@ -21,6 +21,12 @@ std::stringstream& operator >> (std::stringstream& is, std::string& data)
 	return is;
 }
 
+int message_handler(size_t len, const char* message) {
+	int r = 0;
+
+	g_log->info("global::message_handler(len={}, message={})={}", len, std::string(message, len), r);
+	return r;
+}
 
 int main()
 {
@@ -28,7 +34,7 @@ int main()
 	g_log->info("anMessageEngine start...");
 
 	//启动消息处理引擎
-	g_engine.start();
+	g_engine.start(nullptr, message_handler);
 
 	//定义毫秒级别的时钟类型   
 	typedef std::chrono::time_point<std::chrono::system_clock, std::chrono::milliseconds> microClock_type;
@@ -39,7 +45,7 @@ int main()
 	std::thread send_thread([]() {
 		long count = 0;
 		std::random_device rd;
-		while (count<200000) {
+		while (count<2000) {
 			std::vector<char> message;
 
 			//获取当前时间点，windows system_clock是100纳秒级别的(不同系统不一样，自己按照介绍的方法测试)，所以要转换   

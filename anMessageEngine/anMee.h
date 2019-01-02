@@ -10,7 +10,6 @@
 #include <chrono>
 #include <numeric>
 #include <vector>
-#include "../utility/uvloop.h"
 #include "../utility/an_nocopyable.h"
 
 
@@ -23,6 +22,8 @@ public:
 		char a[sizeof(size_t)];
 		size_t x;
 	};
+	using handle_fn = int(*)(size_t, const char*);
+
 private:
 	struct an_async_req : public uv_async_t {
 		explicit an_async_req(class anMee *p) {
@@ -38,14 +39,13 @@ public:
 	anMee();
 	~anMee();
 
-	void start();
+	void start(uv_loop_t* loop, handle_fn cb);
 	void stop();
 	void push(const char*data, size_t len);
 private:
 	void emit();
 	size_t getRawData(raw_buffer &raw);
 
-	static uvloop * s_loop_;
 	static void thread_func(void * lp);
 	static void notify_handler(uv_async_t* handle);
 	static int message_handler(size_t len, const char* message);
@@ -57,5 +57,8 @@ private:
 	using lock = std::lock_guard<std::mutex>;
 	std::atomic_bool flag_ = { ATOMIC_FLAG_INIT };
 	uv_thread_t engine_ = {nullptr};
+
+	std::function<int(size_t, const char*)> handler_;
+	uv_loop_t * loop_;
 };
 

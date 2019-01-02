@@ -7,33 +7,42 @@
 #pragma comment(lib, "..//deps//lib//libuv//release//libuv.lib")
 #endif
 
-//std::shared_ptr<uvloop> anMee::s_loop_;
-uvloop *anMee::s_loop_ = new uvloop(true);
-
-anMee::anMee()
+anMee::anMee():loop_(nullptr)
 {
 }
 
 anMee::~anMee()
 {
 	stop();
-
-	if (s_loop_) {
-		delete s_loop_;
-		s_loop_ = nullptr;
-	}
 }
 
-void anMee::start() {
+void anMee::start(uv_loop_t* loop, handle_fn cb) {
 	if (engine_) return;
 
-	int r = uv_thread_create(&engine_, anMee::thread_func, this);
-	std::this_thread::sleep_for(std::chrono::milliseconds(1));
+	if (nullptr == cb) {
+		handler_ = anMee::message_handler;
+	}
+	else {
+		handler_ = cb;
+	}
+
+	if (nullptr == loop) {
+		loop_ = uv_default_loop();
+
+		//自起线程处理
+		int r = uv_thread_create(&engine_, anMee::thread_func, this);
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
+
+	}
+	else {
+		loop_ = loop;
+	}
 }
+	
 void anMee::stop() {
 	if (!std::atomic_exchange(&this->flag_, false)) return;
 
-	s_loop_->stop();
+	uv_stop(loop_);
 	uv_thread_join(&engine_);
 }
 
@@ -49,9 +58,9 @@ void anMee::push(const char*data, size_t len) {
 
 
 void anMee::emit() {
-	if (s_loop_->get()) {
+	if (loop_) {
 		an_async_req *async = new an_async_req(this);
-		uv_async_init(s_loop_->get(), async, anMee::notify_handler);
+		uv_async_init(loop_, async, anMee::notify_handler);
 
 		uv_async_send(async);
 	}
@@ -102,7 +111,8 @@ void anMee::notify_handler(uv_async_t* handle) {
 		raw_len = data.size();
 
 		//回调，返回完整的包
-		anMee::message_handler(package.size(), package.data());
+		//anMee::message_handler(package.size(), package.data());
+		that->handler_(package.size(), package.data());
 	}
 	
 	//保存不完整的包
@@ -127,15 +137,10 @@ void anMee::thread_func(void * lp) {
 	
 	if (std::atomic_exchange(&that->flag_, true)) return;
 	
-	//anMee::s_loop_ = std::make_shared<uvloop>(true);
-	//anMee::s_loop_ = new uvloop(true);
-
 	int more = 0;
 	while (that->flag_) {
-		more = s_loop_->run_nowait();
+		more = uv_run(that->loop_, UV_RUN_NOWAIT);
 		if (more) continue;
 	}
 
-	//delete anMee::s_loop_;
-	//anMee::s_loop_ = nullptr;
 }
