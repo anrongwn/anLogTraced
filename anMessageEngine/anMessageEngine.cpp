@@ -36,6 +36,16 @@ int main()
 	//启动消息处理引擎
 	g_engine.start(nullptr, message_handler);
 
+	/*//特殊测试用例
+	anMee::u_len  len2;
+	len2.x = 2;
+	std::vector<char> noo;
+	noo.insert(noo.end(), len2.a, len2.a + sizeof(size_t));
+	noo.insert(noo.end(), 'w');
+	g_engine.push(noo.data(), noo.size());
+	g_engine.push("a", 1);
+	*/
+	
 	//定义毫秒级别的时钟类型   
 	typedef std::chrono::time_point<std::chrono::system_clock, std::chrono::milliseconds> microClock_type;
 	//获取当前时间点，windows system_clock是100纳秒级别的(不同系统不一样，自己按照介绍的方法测试)，所以要转换   
