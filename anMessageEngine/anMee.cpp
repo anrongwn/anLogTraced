@@ -76,7 +76,6 @@ size_t anMee::getRawData(raw_buffer &raw) {
 
 
 #define lv_len sizeof(size_t)
-
 void anMee::notify_handler(uv_async_t* handle) {
 	static raw_buffer laster;
 	anMee * that = static_cast<anMee*>(handle->data);
@@ -106,7 +105,7 @@ void anMee::notify_handler(uv_async_t* handle) {
 
 		//È¡°ü
 		raw_buffer package;
-		package.insert(package.end(), data.begin() + lv_len, data.end());
+		package.insert(package.end(), data.begin() + lv_len, data.begin() + lv_len + slen.x);
 		data.erase(data.begin(), data.begin() + lv_len + slen.x);
 		raw_len = data.size();
 
