@@ -249,3 +249,5 @@ ModelManifest.xml
 ./anLogMoniter/logs/*
 ./anMessageEngine/logs
 ./anMessageEngine/logs/*
+./anLogServer/logs
+./anLogServer/logs/*

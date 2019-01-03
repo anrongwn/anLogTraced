@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "anLogMoniter", "anLogMonite
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "anMessageEngine", "anMessageEngine\anMessageEngine.vcxproj", "{BAFFB9C6-5B15-4278-B383-76143E05C904}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "anLogServer", "anLogServer\anLogServer.vcxproj", "{D6B9B06C-5FDD-427E-AB8C-A3991B201E1A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -31,6 +33,14 @@ Global
 		{BAFFB9C6-5B15-4278-B383-76143E05C904}.Release|x64.Build.0 = Release|x64
 		{BAFFB9C6-5B15-4278-B383-76143E05C904}.Release|x86.ActiveCfg = Release|Win32
 		{BAFFB9C6-5B15-4278-B383-76143E05C904}.Release|x86.Build.0 = Release|Win32
+		{D6B9B06C-5FDD-427E-AB8C-A3991B201E1A}.Debug|x64.ActiveCfg = Debug|x64
+		{D6B9B06C-5FDD-427E-AB8C-A3991B201E1A}.Debug|x64.Build.0 = Debug|x64
+		{D6B9B06C-5FDD-427E-AB8C-A3991B201E1A}.Debug|x86.ActiveCfg = Debug|Win32
+		{D6B9B06C-5FDD-427E-AB8C-A3991B201E1A}.Debug|x86.Build.0 = Debug|Win32
+		{D6B9B06C-5FDD-427E-AB8C-A3991B201E1A}.Release|x64.ActiveCfg = Release|x64
+		{D6B9B06C-5FDD-427E-AB8C-A3991B201E1A}.Release|x64.Build.0 = Release|x64
+		{D6B9B06C-5FDD-427E-AB8C-A3991B201E1A}.Release|x86.ActiveCfg = Release|Win32
+		{D6B9B06C-5FDD-427E-AB8C-A3991B201E1A}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

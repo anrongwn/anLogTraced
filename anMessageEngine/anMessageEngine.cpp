@@ -28,8 +28,20 @@ int message_handler(size_t len, const char* message) {
 	return r;
 }
 
-int main()
+int main(int argc, char *argv[], char *envp[])
 {
+	/*
+	for (auto i = 0; i < argc; ++i) {
+		std::string s = fmt::format("argv[{}]={}", i, argv[i]);
+		std::cout << s << std::endl;
+	}
+
+	for (auto i = 0; nullptr != envp[i]; ++i) {
+		std::string s = fmt::format("envp[{}]={}", i, envp[i]);
+		std::cout << s << std::endl;
+	}
+	*/
+
 	std::cout << "anMessageEngine start..." << std::endl;
 	g_log->info("anMessageEngine start...");
 
