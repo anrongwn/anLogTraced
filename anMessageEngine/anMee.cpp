@@ -14,6 +14,11 @@ anMee::anMee():loop_(nullptr)
 anMee::~anMee()
 {
 	stop();
+
+	if ((loop_) && (loop_iscreated)) {
+		uv_loop_close(loop_);
+		delete loop_;
+	}
 }
 
 void anMee::start(uv_loop_t* loop, handle_fn cb) {
@@ -27,10 +32,13 @@ void anMee::start(uv_loop_t* loop, handle_fn cb) {
 	}
 
 	if (nullptr == loop) {
-		loop_ = uv_default_loop();
+		std::atomic_exchange(&this->loop_iscreated, true);
+		loop_ = new uv_loop_t;
+		int r = 0;
+		r = uv_loop_init(loop_);
 
 		//自起线程处理
-		int r = uv_thread_create(&engine_, anMee::thread_func, this);
+		r = uv_thread_create(&engine_, anMee::thread_func, this);
 		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
 	}
