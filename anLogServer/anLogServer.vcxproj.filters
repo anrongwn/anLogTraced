@@ -27,12 +27,24 @@
     <ClInclude Include="..\utility\uvloop2.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="anIPCServer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\anMessageEngine\anMee.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="anLogServer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="anIPCServer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\anMessageEngine\anMee.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

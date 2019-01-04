@@ -6,6 +6,7 @@
 #include <iostream>
 #include <random>
 #include "../utility/uvloop2.h"
+#include "anIPCServer.h"
 
 #ifdef _DEBUG
 #pragma comment(lib, "..//deps//lib//libuv//debug//libuv.lib")
@@ -15,6 +16,10 @@
 
 //全局uvloop
 std::unique_ptr<uvloop2> g_loop = std::make_unique<uvloop2>();
+
+//全局pipe_server
+std::unique_ptr<anIPCServer> g_server = std::make_unique<anIPCServer>();
+
 int main(int argc, char *argv[], char *envp[])
 {
 	int r = 0;
@@ -49,6 +54,8 @@ int main(int argc, char *argv[], char *envp[])
 	g_log->info(log);
 	std::cout << log << std::endl;
 
+	//启动pipe_server
+	r = g_server->start(g_loop->get(), serverName);
 
 	//开启uv_run
 	r = g_loop->run();

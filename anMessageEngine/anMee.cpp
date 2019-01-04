@@ -44,8 +44,9 @@ void anMee::start(uv_loop_t* loop, handle_fn cb) {
 void anMee::stop() {
 	if (!std::atomic_exchange(&this->flag_, false)) return;
 
-	uv_stop(loop_);
+	//Õë¶Ô×ÔÆôuv_run
 	if ((loop_) && (engine_)) {
+		uv_stop(loop_);
 		uv_loop_close(loop_);
 		delete loop_;
 		
