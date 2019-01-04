@@ -14,11 +14,6 @@ anMee::anMee():loop_(nullptr)
 anMee::~anMee()
 {
 	stop();
-
-	if ((loop_) && (loop_iscreated)) {
-		uv_loop_close(loop_);
-		delete loop_;
-	}
 }
 
 void anMee::start(uv_loop_t* loop, handle_fn cb) {
@@ -32,7 +27,6 @@ void anMee::start(uv_loop_t* loop, handle_fn cb) {
 	}
 
 	if (nullptr == loop) {
-		std::atomic_exchange(&this->loop_iscreated, true);
 		loop_ = new uv_loop_t;
 		int r = 0;
 		r = uv_loop_init(loop_);
@@ -51,7 +45,13 @@ void anMee::stop() {
 	if (!std::atomic_exchange(&this->flag_, false)) return;
 
 	uv_stop(loop_);
+	if ((loop_) && (engine_)) {
+		uv_loop_close(loop_);
+		delete loop_;
+		
+	}
 	uv_thread_join(&engine_);
+	loop_ = nullptr;
 }
 
 void anMee::push(const char*data, size_t len) {

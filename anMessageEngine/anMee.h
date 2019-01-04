@@ -65,6 +65,5 @@ private:
 
 	std::function<int(size_t, const char*)> handler_;
 	uv_loop_t * loop_;
-	std::atomic_bool loop_iscreated = { ATOMIC_FLAG_INIT }; //ÊÇ·ñ×Ô´´
 };
 
