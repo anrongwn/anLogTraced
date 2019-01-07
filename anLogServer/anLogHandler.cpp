@@ -21,7 +21,12 @@ void anLogHandler::init(const std::string& path, const std::string& logname, \
 	strfullname += logname;
 	strfullname += suffix;
 
-	spdlog::init_thread_pool(65536, 1);
+	//是否已启动日志线程池?
+	auto tp = spdlog::thread_pool();
+	if (!tp) {
+		spdlog::init_thread_pool(65536, 1);
+	}
+	
 	logger_ = spdlog::daily_logger_mt<spdlog::async_factory>(strLogName_, strfullname);
 
 	logger_->set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%l] [%t] %v");

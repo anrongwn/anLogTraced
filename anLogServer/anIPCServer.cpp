@@ -106,7 +106,7 @@ void anIPCServer::on_close(uv_handle_t* handle) {
 int anIPCServer::on_message_handle(size_t len, const char* message) {
 	int r = 0;
 
-	
+	g_msgHandler.instance()->info("{}", std::string(message, len));
 
 	return r;
 }
@@ -136,6 +136,7 @@ int anIPCServer::start(uv_loop_t * loop, std::string&& serverName) {
 	//启动报文分析引擎
 	message_enginer_->start(loop_, anIPCServer::on_message_handle);
 
+	g_log->info("{}", "anIPCServer::start() success.");
 	return r;
 }
 int anIPCServer::stop() {

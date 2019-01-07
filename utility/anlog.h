@@ -19,7 +19,11 @@ namespace anlog {
 			logpath+=logname;
 			logpath+=".log";
 			
-			spdlog::init_thread_pool(65536, 1);
+			//是否已启动日志线程池?
+			auto tp = spdlog::thread_pool();
+			if (!tp) {
+				spdlog::init_thread_pool(65536, 1);
+			}
 			g_anlog = spdlog::daily_logger_mt<spdlog::async_factory>(logname, logpath);
 
 			g_anlog->set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%l] [%t] %v");
