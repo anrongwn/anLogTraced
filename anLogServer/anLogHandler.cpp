@@ -9,6 +9,7 @@ anLogHandler::anLogHandler()
 
 anLogHandler::~anLogHandler()
 {
+	close();
 }
 
 void anLogHandler::init(const std::string& path, const std::string& logname, \
@@ -41,6 +42,8 @@ void anLogHandler::update_level(const int level) {
 
 void anLogHandler::close() {
 	if (logger_) {
+		logger_->flush();
+
 		spdlog::drop(strLogName_);
 	}
 }
