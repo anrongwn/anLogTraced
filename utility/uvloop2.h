@@ -16,7 +16,7 @@ struct uvloop2 : an::NoCopyable {
 	}
 
 	int close() {
-		if (loop_) {
+		if ((loop_) && (uv_loop_alive(loop_))) {
 			return uv_loop_close(loop_);
 		}
 		else {

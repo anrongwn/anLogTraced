@@ -2,6 +2,7 @@
 #include "..//utility/an_nocopyable.h"
 #include "../deps/include/libuv/uv.h"
 #include "../anMessageEngine/anMee.h"
+#include "anLogHandler.h"
 #include <string>
 #include <memory>
 #include <list>
@@ -39,7 +40,7 @@ public:
 	anIPCServer();
 	~anIPCServer();
 
-	int start(uv_loop_t * loop, std::string& serverName);
+	int start(uv_loop_t * loop, std::string&& serverName);
 	int stop();
 private:
 	static void on_new_connection(uv_stream_t* server, int status);
@@ -53,10 +54,11 @@ private:
 private:
 	std::string strServerName_;
 	uv_loop_t * loop_ = { nullptr };
-	uv_pipe_t  pipe_handler_ = { 0x00 };
+	uv_pipe_t  pipe_server_ = { 0x00 };
 	
 
 	std::unique_ptr<anMee> message_enginer_;
 	std::unique_ptr<client_contain> clients_;
+	
 };
 

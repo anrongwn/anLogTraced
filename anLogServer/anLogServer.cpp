@@ -13,12 +13,14 @@
 #else
 #pragma comment(lib, "..//deps//lib//libuv//release//libuv.lib")
 #endif
+#define AN_PIPE_SERVER_NAME_PREFIX	R"(\\?\pipe\)"
 
 //全局uvloop
 std::unique_ptr<uvloop2> g_loop = std::make_unique<uvloop2>();
 
 //全局pipe_server
 std::unique_ptr<anIPCServer> g_server = std::make_unique<anIPCServer>();
+
 
 int main(int argc, char *argv[], char *envp[])
 {
@@ -44,18 +46,23 @@ int main(int argc, char *argv[], char *envp[])
 		return 0;
 #endif
 	}
+
+	std::string serverName;
 #ifdef _DEBUG
-	std::string serverName ="anLogServer";
+	serverName ="anSPTrace";
 #else
-	std::string serverName = argv[1];
+	serverName = argv[1];
 #endif
 	
 	log = fmt::format("main::logServerName=[{}] started.", serverName);
 	g_log->info(log);
 	std::cout << log << std::endl;
 
+	//设置日志服务信息
+	g_msgHandler.init(R"(D:\MyTest\2018_C++\anLogTraced\logs)", serverName, R"(.ktlog)");
+
 	//启动pipe_server
-	r = g_server->start(g_loop->get(), serverName);
+	r = g_server->start(g_loop->get(), std::string(AN_PIPE_SERVER_NAME_PREFIX) + serverName);
 
 	//开启uv_run
 	r = g_loop->run();

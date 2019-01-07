@@ -33,6 +33,9 @@
     <ClInclude Include="..\anMessageEngine\anMee.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="anLogHandler.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -45,6 +48,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="..\anMessageEngine\anMee.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="anLogHandler.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

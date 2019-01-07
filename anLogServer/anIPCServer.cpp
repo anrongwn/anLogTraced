@@ -4,10 +4,9 @@
 
 anIPCServer::anIPCServer()
 {
-	pipe_handler_.data = this;
+	pipe_server_.data = this;
 	message_enginer_ = std::make_unique<anMee>();
 	clients_ = std::make_unique<client_contain>(this);
-
 }
 
 anIPCServer::~anIPCServer()
@@ -103,28 +102,32 @@ void anIPCServer::on_close(uv_handle_t* handle) {
 	g_log->info(log);
 }
 
+
 int anIPCServer::on_message_handle(size_t len, const char* message) {
 	int r = 0;
+
+	
+
 	return r;
 }
-int anIPCServer::start(uv_loop_t * loop, std::string& serverName) {
+int anIPCServer::start(uv_loop_t * loop, std::string&& serverName) {
 	int r = 0;
 	loop_ = loop;
-	strServerName_ = serverName;
+	strServerName_ = std::forward<std::string>(serverName);
 
-	r = uv_pipe_init(loop_, &pipe_handler_, 0);
+	r = uv_pipe_init(loop_, &pipe_server_, 0);
 	if (r) {
 		g_log->info("anIPCServer::start-- uv_pipe_init()={},errstr={}", r, (r ? uv_strerror(r) : "success"));
 		return r;
 	}
 
-	r = uv_pipe_bind(&pipe_handler_, strServerName_.c_str());
+	r = uv_pipe_bind(&pipe_server_, strServerName_.c_str());
 	if (r) {
 		g_log->info("anIPCServer::start-- uv_pipe_bind({})={},errstr={}", strServerName_, r, (r ? uv_strerror(r) : "success"));
 		return r;
 	}
 
-	r = uv_listen(reinterpret_cast<uv_stream_t*>(&pipe_handler_), 128, anIPCServer::on_new_connection);
+	r = uv_listen(reinterpret_cast<uv_stream_t*>(&pipe_server_), 128, anIPCServer::on_new_connection);
 	if (r) {
 		g_log->info("anIPCServer::start-- uv_listen()={},errstr={}", r, (r ? uv_strerror(r) : "success"));
 		return r;
