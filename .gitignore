@@ -251,3 +251,6 @@ ModelManifest.xml
 ./anMessageEngine/logs/*
 ./anLogServer/logs
 ./anLogServer/logs/*
+./logs
+./logs/*
+/logs/anSPTrace_2019-01-07.ktlog
