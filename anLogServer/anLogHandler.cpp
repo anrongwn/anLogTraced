@@ -30,6 +30,7 @@ void anLogHandler::init(const std::string& path, const std::string& logname, \
 	
 	logger_ = spdlog::daily_logger_mt<spdlog::async_factory>(strLogName_, strfullname);
 
+	//logger_->set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%l] [%t] %v");
 	logger_->set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%l] [%t] %v");
 	logger_->set_level(static_cast<spdlog::level::level_enum>(level));
 }

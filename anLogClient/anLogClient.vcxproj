@@ -189,6 +189,8 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\utility\anwaitconnect.h" />
+    <ClInclude Include="anIPCClient.h" />
     <ClInclude Include="anLogClient.h" />
     <ClInclude Include="anLogClientDlg.h" />
     <ClInclude Include="Resource.h" />
@@ -196,6 +198,7 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="anIPCClient.cpp" />
     <ClCompile Include="anLogClient.cpp" />
     <ClCompile Include="anLogClientDlg.cpp" />
     <ClCompile Include="stdafx.cpp">
@@ -217,4 +220,9 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties RESOURCE_FILE="anLogClient.rc" />
+    </VisualStudio>
+  </ProjectExtensions>
 </Project>
