@@ -1,7 +1,7 @@
 
 // anLogClientDlg.cpp : 实现文件
 //
-
+#include <vld.h>
 #include "stdafx.h"
 #include "anLogClient.h"
 #include "anLogClientDlg.h"
@@ -185,12 +185,13 @@ void CanLogClientDlg::OnBnClickedButton1()
 	// TODO: 在此添加控件通知处理程序代码
 	UpdateData(TRUE);
 
+	//char * p = new char[10];
 	int r = 0;
 	if (ipc_) {
 		std::string  logname(strLogName_.operator LPCSTR());
 		r = ipc_->start(logname);
 
-		//r = ipc_->connect();
+		r = ipc_->connect();
 	}
 }
 

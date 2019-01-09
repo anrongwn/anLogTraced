@@ -1,3 +1,4 @@
+#include <vld.h>
 #include "stdafx.h"
 #include "anIPCClient.h"
 
@@ -64,7 +65,10 @@ int anIPCClient::stop() {
 		uv_stop(&loop_);
 	}
 	*/
-	
+
+	if (!uv_is_closing((uv_handle_t*)&pipe_)) {
+		uv_close((uv_handle_t*)&pipe_, nullptr);
+	}
 	uv_stop(&loop_);
 	
 
@@ -153,7 +157,7 @@ void anIPCClient::on_new_connect(uv_connect_t * req, int status) {
 		
 	}
 	else if (0 == status) {
-		g_log->info("anIPCClient::on_new_connect({:08x}, {}) succeed.", (void*)req, status);
+		g_log->info("anIPCClient::on_new_connect({:08x}, {}) succeed.", (int)req, status);
 		that->wait_.signal();
 	}
 }
@@ -278,7 +282,7 @@ int anIPCClient::write_pipe(char *data, size_t len) {
 	r = uv_write((uv_write_t *)req, (uv_stream_t*)&pipe_, \
 		&req->buf, 1, anIPCClient::on_write);
 	if (r) {
-		g_log->info("anIPCClient::uv_write({:08x}, {})={}, errstr={}", (void*)req->buf.base, req->buf.len, r, uv_strerror(r));
+		g_log->info("anIPCClient::uv_write({:08x}, {})={}, errstr={}", (int)req->buf.base, req->buf.len, r, uv_strerror(r));
 	}
 
 	return r;

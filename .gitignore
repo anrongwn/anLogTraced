@@ -259,3 +259,5 @@ ModelManifest.xml
 ./libuv-1.24.0
 ./libuv-1.24.0/*
 /libuv-1.24.0
+./vld.ini
+/vld.ini

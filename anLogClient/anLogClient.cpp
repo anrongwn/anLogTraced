@@ -1,7 +1,7 @@
 
 // anLogClient.cpp : 定义应用程序的类行为。
 //
-
+#include <vld.h>
 #include "stdafx.h"
 #include "anLogClient.h"
 #include "anLogClientDlg.h"
