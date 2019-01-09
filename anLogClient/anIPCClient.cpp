@@ -220,8 +220,8 @@ int anIPCClient::write(const char level, const char *data, size_t len) {
 	int r = 0;
 	raw_buffer message;
 
-	if (!uv_is_active((uv_handle_t*)&pipe_)) {
-		g_log->info("anIPCClient::write--pipe not active");
+	if (uv_is_closing((uv_handle_t*)&pipe_)) {
+		g_log->info("anIPCClient::write--pipe is closing");
 		return 1;
 	}
 
@@ -269,8 +269,8 @@ void anIPCClient::pack(const char level, const char *data, size_t len, \
 int anIPCClient::write_pipe(char *data, size_t len) {
 	int r = 0;
 
-	if (!uv_is_active((uv_handle_t*)&pipe_)) {
-		g_log->info("anIPCClient::write_pipe --pipe not active");
+	if (uv_is_closing((uv_handle_t*)&pipe_)) {
+		g_log->info("anIPCClient::write_pipe --pipe is closing");
 		return 1;
 	}
 

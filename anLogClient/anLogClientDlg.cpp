@@ -199,4 +199,38 @@ void CanLogClientDlg::OnBnClickedButton1()
 void CanLogClientDlg::OnBnClickedButton2()
 {
 	// TODO: 在此添加控件通知处理程序代码
+	if (!ipc_) return;
+
+	static std::thread writer;
+	static std::atomic_bool stop = { ATOMIC_FLAG_INIT };
+
+	if (writer.joinable()) {
+		std::atomic_exchange(&stop, true);
+
+		writer.join();
+
+		g_log->debug("-----writer notify exit{}", 1);
+	}
+	else {
+		std::atomic_exchange(&stop, false);
+
+		writer = std::thread([&](anIPCClient * ipc) {
+			int r = 0;
+			SYSTEMTIME st = { 0x00 };
+			char date_tmp[24] = { 0x00 };
+			while (!stop) {
+				//得到当时间
+				::GetLocalTime(&st);
+				sprintf_s(date_tmp, "%04d-%02d-%02d %02d:%02d:%02d.%03d", st.wYear, st.wMonth, \
+					st.wDay, st.wHour, st.wMinute, st.wSecond, st.wMilliseconds);
+								
+				r = ipc->write('1', date_tmp, 23);
+				if (r) {
+					break;
+				}
+			}
+
+			g_log->debug("-----writer thread exit{}", 1);
+		}, this->ipc_.get());
+	}
 }
