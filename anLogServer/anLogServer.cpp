@@ -68,7 +68,7 @@ int main(int argc, char *argv[], char *envp[])
 	r = g_loop->run();
 
 #ifdef _DEBUG
-	system("pause");
+	//system("pause");
 #endif
 
     return r;

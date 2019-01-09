@@ -51,19 +51,26 @@ END_MESSAGE_MAP()
 
 CanLogClientDlg::CanLogClientDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(IDD_ANLOGCLIENT_DIALOG, pParent)
+	, strLogName_(_T("anSPTrace"))
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+
+	ipc_ = std::make_unique<anIPCClient>();
 }
 
 void CanLogClientDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
+	DDX_Text(pDX, IDC_EDIT1, strLogName_);
 }
 
 BEGIN_MESSAGE_MAP(CanLogClientDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
+	ON_EN_CHANGE(IDC_EDIT1, &CanLogClientDlg::OnEnChangeEdit1)
+	ON_BN_CLICKED(IDC_BUTTON1, &CanLogClientDlg::OnBnClickedButton1)
+	ON_BN_CLICKED(IDC_BUTTON2, &CanLogClientDlg::OnBnClickedButton2)
 END_MESSAGE_MAP()
 
 
@@ -99,10 +106,18 @@ BOOL CanLogClientDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 
 	// TODO: 在此添加额外的初始化代码
+	
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
+CanLogClientDlg::~CanLogClientDlg() {
+	if (ipc_) {
+		ipc_->stop();
+	}
 
+	//anlog::close("anLogClient");
+	//g_log->flush();
+}
 void CanLogClientDlg::OnSysCommand(UINT nID, LPARAM lParam)
 {
 	if ((nID & 0xFFF0) == IDM_ABOUTBOX)
@@ -152,3 +167,35 @@ HCURSOR CanLogClientDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
+
+
+void CanLogClientDlg::OnEnChangeEdit1()
+{
+	// TODO:  如果该控件是 RICHEDIT 控件，它将不
+	// 发送此通知，除非重写 CDialogEx::OnInitDialog()
+	// 函数并调用 CRichEditCtrl().SetEventMask()，
+	// 同时将 ENM_CHANGE 标志“或”运算到掩码中。
+
+	// TODO:  在此添加控件通知处理程序代码
+}
+
+
+void CanLogClientDlg::OnBnClickedButton1()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	UpdateData(TRUE);
+
+	int r = 0;
+	if (ipc_) {
+		std::string  logname(strLogName_.operator LPCSTR());
+		r = ipc_->start(logname);
+
+		//r = ipc_->connect();
+	}
+}
+
+
+void CanLogClientDlg::OnBnClickedButton2()
+{
+	// TODO: 在此添加控件通知处理程序代码
+}

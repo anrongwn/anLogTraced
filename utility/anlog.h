@@ -15,7 +15,7 @@ namespace anlog {
 
 	logger& init(const char* logname) {
 		if (!g_anlog) {
-			std::string logpath(R"(logs/)");
+			std::string logpath(R"(D:\MyTest\2018_C++\anLogTraced\logs\)");
 			logpath+=logname;
 			logpath+=".log";
 			
@@ -28,6 +28,7 @@ namespace anlog {
 
 			g_anlog->set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%l] [%t] %v");
 			g_anlog->set_level(spdlog::level::trace);
+			g_anlog->flush_on(spdlog::level::info);
 		}
 		
 		return g_anlog;

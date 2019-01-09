@@ -28,11 +28,14 @@ void anLogHandler::init(const std::string& path, const std::string& logname, \
 		spdlog::init_thread_pool(65536, 1);
 	}
 	
+	//g_log->info("anLogHandler::init({}, {})", strLogName_, strfullname);
+
 	logger_ = spdlog::daily_logger_mt<spdlog::async_factory>(strLogName_, strfullname);
 
 	//logger_->set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%l] [%t] %v");
 	logger_->set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%l] [%t] %v");
 	logger_->set_level(static_cast<spdlog::level::level_enum>(level));
+	logger_->flush_on(spdlog::level::info);
 }
 
 void anLogHandler::update_level(const int level) {

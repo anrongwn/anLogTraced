@@ -15,12 +15,14 @@ anIPCServer::~anIPCServer()
 }
 
 void anIPCServer::on_new_connection(uv_stream_t* server, int status) {
+
+	g_log->info("anIPCServer::on_new_connection({:#08x})", status);
 	if (status < 0) {
 
 		uv_close(reinterpret_cast<uv_handle_t*>(server), nullptr);
 
-		g_log->info("anIPCServer::on_new_connection({:08x})={}, errstr={}", \
-			(void*)server, status, uv_strerror(status));
+		g_log->info("anIPCServer::on_new_connection({:#08x})={}, errstr={}", \
+			(int)server, status, uv_strerror(status));
 
 		return;
 	}
@@ -33,7 +35,7 @@ void anIPCServer::on_new_connection(uv_stream_t* server, int status) {
 	r = uv_pipe_init(that->loop_, client.get(), 0);
 	client->data = that;
 
-	std::string log = fmt::format("anIPCServer::on_new_connection--uv_pipe_init({:08x})={}", (void*)client.get());
+	std::string log = fmt::format("anIPCServer::on_new_connection--uv_pipe_init({:#08x})={}", (int)(client.get()), r);
 	if (r) {
 		log += fmt::format(",={}, errstr={}", r, uv_strerror(r));
 		g_log->info(log);
@@ -67,12 +69,15 @@ void anIPCServer::on_write(uv_write_t * req, int status) {
 
 }
 void anIPCServer::on_read(uv_stream_t *client, ssize_t nread, const uv_buf_t *buf) {
-	std::string log = fmt::format("anIPCServer::on_read({:08x}, {})", (void*)client, nread);
+	std::string log = fmt::format("anIPCServer::on_read({:#08x}, {})", (int)client, nread);
 	
 	anIPCServer * that = reinterpret_cast<anIPCServer *>(client->data);
 	if (nread > 0) {
 		that->message_enginer_->push(buf->base, nread);
 		log += fmt::format(",data={}", std::string(buf->base, nread));
+
+		//
+		free(buf->base);
 	}else if (nread < 0) {
 		if (!uv_is_closing((uv_handle_t*)client)) {
 			uv_close(reinterpret_cast<uv_handle_t*>(client), anIPCServer::on_close);
@@ -80,15 +85,12 @@ void anIPCServer::on_read(uv_stream_t *client, ssize_t nread, const uv_buf_t *bu
 	}
 
 	g_log->info(log);
-
-	//
-	free(buf->base);
 }
 void anIPCServer::on_notify(uv_async_t* handle) {
 
 }
 void anIPCServer::on_close(uv_handle_t* handle) {
-	std::string log = fmt::format("anIPCServer::on_close({:08x})", (void*)handle);
+	std::string log = fmt::format("anIPCServer::on_close({:#08x})", (int)handle);
 
 	if (UV_ASYNC == handle->type) {
 	

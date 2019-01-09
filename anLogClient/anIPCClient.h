@@ -63,7 +63,8 @@ private:
 	int init();
 	void connect_impl();
 	/**package format
-	|*****lenght*****|***message+level***|
+	|lenght|message|
+	|*****lenght*****|***level+data***|
 	*/
 	void pack(const char level, const char *data, size_t len, raw_buffer& message);
 	int write_pipe(char *data, size_t len);

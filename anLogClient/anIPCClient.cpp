@@ -28,13 +28,20 @@ int anIPCClient::start(const std::string& logname) {
 
 	if (thread_.joinable()) return r;
 
+	wait_.reset();
+	r = this->init();
+	if (r) {
+		g_log->info("anIPCClient::start--init={}, errstr={}", r, uv_strerror(r));
+		return r;
+	}
+
 	strlogname_ = logname;
-	thread_ = std::forward<std::thread>(std::thread(anIPCClient::run, this));
+	thread_ = std::thread(anIPCClient::run, this);
 	if (thread_.joinable()) {
 		std::stringstream s;
 		s << thread_.get_id();
 
-		g_log->info("anIPCClient::start() success.,threadid={:08x}", std::stol(s.str()));
+		g_log->info("anIPCClient::start() succeeded, threadid={:#08x}", std::stol(s.str()));
 	}
 
 	return r;
@@ -45,21 +52,29 @@ int anIPCClient::stop() {
 
 	if (std::atomic_exchange(&this->flag_, true)) return 0;
 
+	/*
 	if (!uv_is_closing((uv_handle_t*)&connect_)) {
 		uv_close((uv_handle_t*)&connect_, nullptr);
 	}
 	if (!uv_is_closing((uv_handle_t*)&pipe_)) {
 		uv_close((uv_handle_t*)&pipe_, nullptr);
 	}
-
+	
 	if (uv_is_active((uv_handle_t*)&loop_)) {
 		uv_stop(&loop_);
 	}
+	*/
+	
+	uv_stop(&loop_);
+	
 
-	thread_.join();
+	if (thread_.joinable()) {
+		thread_.join();
 
-	wait_.reset();
-
+		uv_loop_close(&loop_);
+		wait_.reset();
+	}
+	
 	return r;
 }
 
@@ -92,10 +107,11 @@ int anIPCClient::connect() {
 }
 
 void anIPCClient::on_new_connect(uv_connect_t * req, int status) {
-	anIPCClient * that = reinterpret_cast<anIPCClient*>(req);
+	anIPCClient * that = reinterpret_cast<anIPCClient*>(req->data);
 
 	if (status) {
 		//Æô¶¯·þÎñ
+		int r = that->wait_.get_count();
 		if (0 == that->wait_.get_count()) {
 			char* args[3];
 #ifdef _DEBUG
@@ -116,13 +132,15 @@ void anIPCClient::on_new_connect(uv_connect_t * req, int status) {
 			options.args = args;
 
 			options.file = args[0];
-			options.flags = UV_PROCESS_DETACHED;
+			options.flags = UV_PROCESS_DETACHED| UV_PROCESS_WINDOWS_HIDE;
+			options.env = nullptr;
+			options.stdio_count = 0;
 
 			
 			int r = uv_spawn(&that->loop_, &that->process_req_, &options);
 			if (r) {
 				g_log->info("anIPCClient::on_new_connect--uv_spawn({})={}, errstr={}", options.file, r, uv_strerror(r));
-				return;
+				//return;
 			}
 			uv_unref((uv_handle_t *)&that->process_req_);
 		}
@@ -176,12 +194,6 @@ void anIPCClient::run(void * arg) {
 	anIPCClient * that = reinterpret_cast<anIPCClient*>(arg);
 
 	int r = 0;
-	r = that->init();
-	if (r) {
-		g_log->info("anIPCClient::run()--init={}, errstr={}", r, (r?uv_strerror(r) : "success."));
-		return;
-	}
-
 	while (true) {
 		if (that->flag_) break;
 
@@ -231,7 +243,8 @@ int anIPCClient::write(const char level, const char *data, size_t len) {
 }
 
 /**package format
-|*****lenght*****|***message+level***|
+|lenght|message|
+|*****lenght*****|***level+data***|
 */
 void anIPCClient::pack(const char level, const char *data, size_t len, \
 	raw_buffer& message) {
@@ -239,9 +252,13 @@ void anIPCClient::pack(const char level, const char *data, size_t len, \
 	u_len message_len;
 	message_len.x = len + sizeof(char);
 
+	//length
 	message.insert(message.end(), message_len.a, message_len.a + sizeof(message_len.a));
-	message.insert(message.end(), data, data + len);
+	//level
 	message.push_back(level);
+	//data
+	message.insert(message.end(), data, data + len);
+	
 
 }
 
