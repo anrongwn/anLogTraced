@@ -5,9 +5,12 @@
 
 anIPCClient::anIPCClient()
 {
-	pipe_.data = this;
-	loop_.data = this;
-	connect_.data = this;
+	uv_handle_set_data((uv_handle_t*)&pipe_, this);
+	uv_handle_set_data((uv_handle_t*)&loop_, this);
+	uv_handle_set_data((uv_handle_t*)&connect_, this);
+	//pipe_.data = this;
+	//loop_.data = this;
+	//connect_.data = this;
 }
 
 
@@ -111,7 +114,7 @@ int anIPCClient::connect() {
 }
 
 void anIPCClient::on_new_connect(uv_connect_t * req, int status) {
-	anIPCClient * that = reinterpret_cast<anIPCClient*>(req->data);
+	anIPCClient * that = reinterpret_cast<anIPCClient*>( uv_handle_get_data((uv_handle_t*)req) );
 
 	if (status) {
 		//启动服务
@@ -175,7 +178,7 @@ void anIPCClient::on_close(uv_handle_t* handle) {
 	}
 	else if (UV_NAMED_PIPE == handle->type) {
 		//服务端终止连接后，工作线程uv_run退出，分离当前线程 
-		anIPCClient * that = static_cast<anIPCClient*>(handle->data);
+		anIPCClient * that = static_cast<anIPCClient*>(uv_handle_get_data((uv_handle_t*)handle));
 		if ((&that->pipe_) == (void*)(handle))
 		{
 			//防此线程退出后，还可以joinable
@@ -209,7 +212,7 @@ void anIPCClient::run(void * arg) {
 }
 void anIPCClient::on_notify(uv_async_t* handle) {
 	an_async *req = static_cast<an_async*>(handle);
-	anIPCClient * that = static_cast<anIPCClient*>(req->data);
+	anIPCClient * that = static_cast<anIPCClient*>(uv_handle_get_data((uv_handle_t*)req));
 	
 	that->write_pipe(req->buf.base, req->buf.len);
 
@@ -278,7 +281,8 @@ int anIPCClient::write_pipe(char *data, size_t len) {
 	}
 
 	an_write * req = new an_write(this);
-	req->data = this;
+	uv_handle_set_data((uv_handle_t*)req, this);
+	//req->data = this;
 	req->buf.base = (data);
 	req->buf.len = len;
 

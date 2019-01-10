@@ -215,6 +215,7 @@ void CanLogClientDlg::OnBnClickedButton2()
 		writer.join();
 
 		g_log->debug("-----writer notify exit{}", 1);
+		this->GetDlgItem(IDC_BUTTON2)->SetWindowTextA("Write");
 	}
 	else {
 		std::atomic_exchange(&stop, false);
@@ -256,5 +257,7 @@ void CanLogClientDlg::OnBnClickedButton2()
 
 			g_log->debug("-----writer thread exit{}", 1);
 		}, this->ipc_.get());
+
+		this->GetDlgItem(IDC_BUTTON2)->SetWindowTextA("Stop");
 	}
 }
