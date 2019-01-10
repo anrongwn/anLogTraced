@@ -6,6 +6,7 @@
 #include "anLogClient.h"
 #include "anLogClientDlg.h"
 #include "afxdialogex.h"
+#include <random>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -195,7 +196,11 @@ void CanLogClientDlg::OnBnClickedButton1()
 	}
 }
 
-
+//包长度
+using u_len = union {
+	char a[sizeof(size_t)];
+	size_t x;
+};
 void CanLogClientDlg::OnBnClickedButton2()
 {
 	// TODO: 在此添加控件通知处理程序代码
@@ -216,18 +221,37 @@ void CanLogClientDlg::OnBnClickedButton2()
 
 		writer = std::thread([&](anIPCClient * ipc) {
 			int r = 0;
-			SYSTEMTIME st = { 0x00 };
-			char date_tmp[24] = { 0x00 };
+			
+			std::default_random_engine re;
+			std::default_random_engine re2;
+			std::uniform_int_distribution<unsigned> u(0, 5);
+			char level = 0x31;
 			while (!stop) {
+				SYSTEMTIME st = { 0x00 };
+				char date_tmp[24] = { 0x00 };
+
 				//得到当时间
 				::GetLocalTime(&st);
 				sprintf_s(date_tmp, "%04d-%02d-%02d %02d:%02d:%02d.%03d", st.wYear, st.wMonth, \
 					st.wDay, st.wHour, st.wMinute, st.wSecond, st.wMilliseconds);
-								
-				r = ipc->write('1', date_tmp, 23);
+				
+				level = 0x30 + u(re);
+				std::vector<char> v;
+				//v.push_back(level);
+				v.push_back('*');
+				v.insert(v.end(), date_tmp, date_tmp + 23);
+				v.push_back('*');
+
+				std::string id = std::to_string(re2());
+				v.insert(v.end(), id.begin(), id.end());
+
+				r = ipc->write(level, v.data(), v.size());
+
 				if (r) {
 					break;
 				}
+
+				std::this_thread::sleep_for(std::chrono::milliseconds(1));
 			}
 
 			g_log->debug("-----writer thread exit{}", 1);

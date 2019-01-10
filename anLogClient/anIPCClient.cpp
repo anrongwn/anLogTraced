@@ -241,6 +241,9 @@ int anIPCClient::write(const char level, const char *data, size_t len) {
 		if (r) {
 			g_log->info("anIPCClient::write--uv_async_send={}, errstr={}", r, uv_strerror(r));
 		}
+		else {
+			g_log->info("anIPCClient::write(level={}, data={}, len={})", level, std::string(message.data(), message.size()), message.size());
+		}
 	}
 
 	return r;
@@ -283,6 +286,9 @@ int anIPCClient::write_pipe(char *data, size_t len) {
 		&req->buf, 1, anIPCClient::on_write);
 	if (r) {
 		g_log->info("anIPCClient::uv_write({:08x}, {})={}, errstr={}", (int)req->buf.base, req->buf.len, r, uv_strerror(r));
+	}
+	else {
+		g_log->info("anIPCClient::write_pipe-uv_write(data={}, len={})", std::string(data, len), len);
 	}
 
 	return r;

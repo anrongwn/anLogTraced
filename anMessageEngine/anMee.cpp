@@ -136,8 +136,36 @@ void anMee::close_cb(uv_handle_t* handle) {
 int anMee::message_handler(size_t len, const char* message) {
 	int r = 0;
 
-	g_log->info("anMee::message_handler(len={}, message={})={}", len, std::string(message, len), r);
+	/*
+	@param1:level '0'--trace, '1'--debug, '2'--info,\
+					'3'--warn, '4'--error, '5'--critical, '6'--off
+					*/
+	char level = message[0];
 
+	switch (level){
+	case '0':
+		g_log->trace("anMee::message_handler(len={}, message={})={}", len, std::string(message+1, len-1), r);
+		break;
+	case '1':
+		g_log->debug("anMee::message_handler(len={}, message={})={}", len, std::string(message + 1, len - 1), r);
+		break;
+	case '2':
+		g_log->info("anMee::message_handler(len={}, message={})={}", len, std::string(message + 1, len - 1), r);
+		break;
+	case '3':
+		g_log->warn("anMee::message_handler(len={}, message={})={}", len, std::string(message + 1, len - 1), r);
+		break;
+	case '4':
+		g_log->error("anMee::message_handler(len={}, message={})={}", len, std::string(message + 1, len - 1), r);
+		break;
+	case '5':
+		g_log->critical("anMee::message_handler(len={}, message={})={}", len, std::string(message + 1, len - 1), r);
+		break;
+	case '6':
+	default:
+		break;
+	}
+	
 	return r;
 }
 void anMee::thread_func(void * lp) {

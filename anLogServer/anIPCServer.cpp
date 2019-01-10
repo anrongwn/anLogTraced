@@ -108,7 +108,34 @@ void anIPCServer::on_close(uv_handle_t* handle) {
 int anIPCServer::on_message_handle(size_t len, const char* message) {
 	int r = 0;
 
-	g_msgHandler.instance()->info("{}", std::string(message, len));
+	//g_msgHandler.instance()->info("{}", std::string(message, len));
+	char level = message[0];
+
+	switch (level) {
+	case '0':
+		g_msgHandler.instance()->trace("anMee::message_handler(len={}, message={})={}", len, std::string(message + 1, len - 1), r);
+		break;
+	case '1':
+		g_msgHandler.instance()->debug("anMee::message_handler(len={}, message={})={}", len, std::string(message + 1, len - 1), r);
+		break;
+	case '2':
+		g_msgHandler.instance()->info("anMee::message_handler(len={}, message={})={}", len, std::string(message + 1, len - 1), r);
+		break;
+	case '3':
+		g_msgHandler.instance()->warn("anMee::message_handler(len={}, message={})={}", len, std::string(message + 1, len - 1), r);
+		break;
+	case '4':
+		g_msgHandler.instance()->error("anMee::message_handler(len={}, message={})={}", len, std::string(message + 1, len - 1), r);
+		break;
+	case '5':
+		g_msgHandler.instance()->critical("anMee::message_handler(len={}, message={})={}", len, std::string(message + 1, len - 1), r);
+		break;
+	case '6':
+	default:
+		break;
+	}
+
+	return r;
 
 	return r;
 }
