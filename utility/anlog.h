@@ -26,7 +26,7 @@ namespace anlog {
 			}
 			g_anlog = spdlog::daily_logger_mt<spdlog::async_factory>(logname, logpath);
 
-			g_anlog->set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%l] [%t] %v");
+			g_anlog->set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%^---%L---%$] [%t] %v");
 			g_anlog->set_level(spdlog::level::trace);
 			g_anlog->flush_on(spdlog::level::info);
 		}

@@ -30,6 +30,8 @@ int anIPCClient::init() {
 int anIPCClient::start(const std::string& logname) {
 	int r = 0;
 
+	std::lock_guard<std::mutex> lock(mtx_);
+
 	if (thread_.joinable()) return r;
 
 	wait_.reset();
@@ -53,7 +55,7 @@ int anIPCClient::start(const std::string& logname) {
 
 int anIPCClient::stop() {
 	int r = 0;
-
+	std::lock_guard<std::mutex> lock(mtx_);
 	if (std::atomic_exchange(&this->flag_, true)) return 0;
 
 	/*
@@ -202,7 +204,7 @@ void anIPCClient::run(void * arg) {
 
 	int r = 0;
 	while (true) {
-		if (that->flag_) break;
+		if ((that->flag_)&&(0==r)) break;	//退出标志为true 和没有 io 处理
 
 		r = uv_run(&that->loop_, UV_RUN_NOWAIT);
 
@@ -220,6 +222,8 @@ void anIPCClient::on_notify(uv_async_t* handle) {
 }
 
 int anIPCClient::write(const char level, const char *data, size_t len) {
+	std::lock_guard<std::mutex> lock(mtx_);
+
 	int r = 0;
 	raw_buffer message;
 

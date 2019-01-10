@@ -7,6 +7,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <mutex>
 
 
 class anIPCClient : private an::NoCopyable
@@ -83,5 +84,6 @@ private:
 
 	std::atomic_bool flag_ = { ATOMIC_FLAG_INIT }; //是否停止标志
 	std::string strlogname_;
+	std::mutex mtx_;	//ipc 多线程支持
 };
 
