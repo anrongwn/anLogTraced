@@ -19,7 +19,7 @@ int anIPCClient::init() {
 
 	r = uv_loop_init(&loop_);
 	if (0 == r) {
-		r = uv_pipe_init(&loop_, &pipe_, 1);
+		r = uv_pipe_init(&loop_, &pipe_, 0);
 	}
 	return r;
 }
@@ -58,8 +58,6 @@ int anIPCClient::stop() {
 	//if (std::atomic_exchange(&this->flag_, true)) return 0;
 
 	/*
-	
-	
 	if (uv_is_active((uv_handle_t*)&loop_)) {
 		uv_stop(&loop_);
 	}
@@ -76,7 +74,7 @@ int anIPCClient::stop() {
 	if (thread_.joinable()) {
 		thread_.join();
 
-		uv_loop_close(&loop_);
+		//uv_loop_close(&loop_);
 		wait_.reset();
 	}
 	
@@ -120,7 +118,6 @@ void anIPCClient::on_new_connect(uv_connect_t * req, int status) {
 		//
 		if (UV_ENOENT == status) {
 			//启动服务
-			int r = that->wait_.get_count();
 			if (0 == that->wait_.get_count()) {
 				char* args[3];
 #ifdef _DEBUG
@@ -166,7 +163,6 @@ void anIPCClient::on_new_connect(uv_connect_t * req, int status) {
 			//重连
 			that->connect_impl();
 			that->wait_.signal_once();
-
 		}
 
 		//
@@ -223,10 +219,11 @@ void anIPCClient::run(void * arg) {
 		}
 
 		r = uv_run(&that->loop_, UV_RUN_NOWAIT);
-
+		//g_log->info("anIPCClient::run()--uv_run()={}", r);
 	}
-
-	g_log->info("anIPCClient::run() exit.");
+	r = uv_loop_close(&that->loop_);
+	g_log->info("anIPCClient::run() exit. uv_loop_close()={}", r);
+	
 }
 void anIPCClient::on_notify(uv_async_t* handle) {
 	an_async *req = static_cast<an_async*>(handle);
@@ -259,8 +256,6 @@ int anIPCClient::write(const char level, const char *data, size_t len) {
 	r = uv_async_init(&loop_, req, anIPCClient::on_notify);
 	if (r) {
 		g_log->info("anIPCClient::write--uv_async_init={}, errstr={}", r, uv_strerror(r));
-
-		
 	}
 	else {
 		r = uv_async_send(req);
@@ -305,7 +300,11 @@ int anIPCClient::write_pipe(char *data, size_t len) {
 	int r = 0;
 
 	if (uv_is_closing((uv_handle_t*)&pipe_)) {
-		g_log->info("anIPCClient::write_pipe --pipe is closing");
+		g_log->info("anIPCClient::write_pipe({}, {})-- pipe is closing", std::string(data, len), len);
+
+		//free 
+		if (data) free(data);
+
 		return 1;
 	}
 
@@ -319,7 +318,8 @@ int anIPCClient::write_pipe(char *data, size_t len) {
 	r = uv_write((uv_write_t *)req, (uv_stream_t*)&pipe_, \
 		&req->buf, 1, anIPCClient::on_write);
 	if (r) {
-		g_log->info("anIPCClient::uv_write({:08x}, {})={}, errstr={}", (int)req->buf.base, req->buf.len, r, uv_strerror(r));
+		g_log->info("anIPCClient::uv_write({:08x}-{}, {})={}, errstr={}", (int)req->buf.base, std::string(req->buf.base, req->buf.len), \
+			req->buf.len, r, uv_strerror(r));
 
 		//free 
 		if (req->buf.base) free(req->buf.base);

@@ -256,6 +256,7 @@ void CanLogClientDlg::OnBnClickedButton2()
 			}
 
 			g_log->debug("-----writer thread exit{}", 1);
+
 		}, this->ipc_.get());
 
 		this->GetDlgItem(IDC_BUTTON2)->SetWindowTextA("Stop");
