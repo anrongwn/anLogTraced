@@ -64,12 +64,13 @@ int anIPCClient::stop() {
 	*/
 
 	if (!uv_is_closing((uv_handle_t*)&pipe_)) {
-		uv_close((uv_handle_t*)&pipe_, nullptr);
+		uv_close((uv_handle_t*)&pipe_, anIPCClient::on_close);
+		//std::this_thread::sleep_for(std::chrono::milliseconds(10));
 	}
 	uv_stop(&loop_);
 	
 	std::atomic_exchange(&this->flag_, true);
-	std::this_thread::sleep_for(std::chrono::milliseconds(1));
+	
 
 	if (thread_.joinable()) {
 		thread_.join();
@@ -212,17 +213,31 @@ void anIPCClient::run(void * arg) {
 	anIPCClient * that = reinterpret_cast<anIPCClient*>(arg);
 
 	int r = 0;
+
+	//主消息处理
 	while (true) {
 		if ((that->flag_) && (0 == r))
+		//if ((that->flag_) )
 		{
 			break;	//退出标志为true 和没有 io 处理
 		}
 
+		//r = uv_run(&that->loop_, UV_RUN_DEFAULT);
+		//r = uv_run(&that->loop_, UV_RUN_ONCE);
 		r = uv_run(&that->loop_, UV_RUN_NOWAIT);
-		//g_log->info("anIPCClient::run()--uv_run()={}", r);
+		//g_log->info("anIPCClient::run()--uv_run(UV_RUN_DEFAULT)={}", r);
 	}
-	r = uv_loop_close(&that->loop_);
-	g_log->info("anIPCClient::run() exit. uv_loop_close()={}", r);
+
+	//处理还未能关闭的handle，防止内存泄漏
+	do {
+		r = uv_loop_close(&that->loop_);
+		if (r) {
+			uv_run(&that->loop_, UV_RUN_ONCE);
+		}
+		g_log->info("anIPCClient::run() exit. uv_loop_close()={}", r);
+	} while (r);
+	
+	
 	
 }
 void anIPCClient::on_notify(uv_async_t* handle) {
