@@ -58,22 +58,16 @@ int anIPCClient::stop() {
 	//if (std::atomic_exchange(&this->flag_, true)) return 0;
 
 	/*
-	if (!uv_is_closing((uv_handle_t*)&connect_)) {
-		uv_close((uv_handle_t*)&connect_, nullptr);
-	}
-	if (!uv_is_closing((uv_handle_t*)&pipe_)) {
-		uv_close((uv_handle_t*)&pipe_, nullptr);
-	}
+	
 	
 	if (uv_is_active((uv_handle_t*)&loop_)) {
 		uv_stop(&loop_);
 	}
 	*/
 
-	//uv_close((uv_handle_t*)&connect_, nullptr);
-	uv_close((uv_handle_t*)&pipe_, nullptr);
-	//uv_close((uv_handle_t*)&process_req_, nullptr);
-
+	if (!uv_is_closing((uv_handle_t*)&pipe_)) {
+		uv_close((uv_handle_t*)&pipe_, nullptr);
+	}
 	uv_stop(&loop_);
 	
 	std::atomic_exchange(&this->flag_, true);
@@ -157,7 +151,14 @@ void anIPCClient::on_new_connect(uv_connect_t * req, int status) {
 					g_log->info("anIPCClient::on_new_connect--uv_spawn({})={}, errstr={}", options.file, r, uv_strerror(r));
 					//return;
 				}
-				uv_unref((uv_handle_t *)&that->process_req_);
+
+				//及时关闭，防止内存泄漏
+				if (!uv_is_closing((uv_handle_t*)&that->process_req_))
+				{
+					uv_close((uv_handle_t*)&that->process_req_, nullptr);
+					uv_unref((uv_handle_t *)&that->process_req_);
+				}
+				
 			}
 			//::Sleep(10);
 			std::this_thread::sleep_for(std::chrono::microseconds(10));
@@ -233,6 +234,7 @@ void anIPCClient::on_notify(uv_async_t* handle) {
 	
 	that->write_pipe(req->buf.base, req->buf.len);
 
+	//
 	uv_close((uv_handle_t*)handle, anIPCClient::on_close);
 }
 
@@ -257,6 +259,8 @@ int anIPCClient::write(const char level, const char *data, size_t len) {
 	r = uv_async_init(&loop_, req, anIPCClient::on_notify);
 	if (r) {
 		g_log->info("anIPCClient::write--uv_async_init={}, errstr={}", r, uv_strerror(r));
+
+		
 	}
 	else {
 		r = uv_async_send(req);
@@ -266,6 +270,12 @@ int anIPCClient::write(const char level, const char *data, size_t len) {
 		else {
 			g_log->info("anIPCClient::write(level={}, data={}, len={})", level, std::string(message.data(), message.size()), message.size());
 		}
+	}
+
+	//
+	if (r) {
+		if (req->buf.base) free(req->buf.base);
+		delete req;
 	}
 
 	return r;
@@ -305,10 +315,17 @@ int anIPCClient::write_pipe(char *data, size_t len) {
 	req->buf.base = (data);
 	req->buf.len = len;
 
+
 	r = uv_write((uv_write_t *)req, (uv_stream_t*)&pipe_, \
 		&req->buf, 1, anIPCClient::on_write);
 	if (r) {
 		g_log->info("anIPCClient::uv_write({:08x}, {})={}, errstr={}", (int)req->buf.base, req->buf.len, r, uv_strerror(r));
+
+		//free 
+		if (req->buf.base) free(req->buf.base);
+		delete req;
+
+		uv_close((uv_handle_t*)&pipe_, nullptr);
 	}
 	else {
 		g_log->info("anIPCClient::write_pipe-uv_write(data={}, len={})", std::string(data, len), len);

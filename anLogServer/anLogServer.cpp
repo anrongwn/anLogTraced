@@ -63,6 +63,9 @@ int main(int argc, char *argv[], char *envp[])
 
 	//Æô¶¯pipe_server
 	r = g_server->start(g_loop->get(), std::string(AN_PIPE_SERVER_NAME_PREFIX) + serverName);
+	if (r) {
+		return r;
+	}
 
 	//¿ªÆôuv_run
 	r = g_loop->run();
