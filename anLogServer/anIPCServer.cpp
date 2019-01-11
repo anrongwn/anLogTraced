@@ -18,12 +18,11 @@ void anIPCServer::on_new_connection(uv_stream_t* server, int status) {
 
 	g_log->info("anIPCServer::on_new_connection({:#08x})", status);
 	if (status < 0) {
-
-		uv_close(reinterpret_cast<uv_handle_t*>(server), nullptr);
-
+		if (UV_EOF == status) {
+			uv_close(reinterpret_cast<uv_handle_t*>(server), nullptr);
+		}
 		g_log->info("anIPCServer::on_new_connection({:#08x})={}, errstr={}", \
 			(int)server, status, uv_strerror(status));
-
 		return;
 	}
 
@@ -32,7 +31,7 @@ void anIPCServer::on_new_connection(uv_stream_t* server, int status) {
 	//Éú³Épipe_client
 	std::unique_ptr<uv_pipe_t> client = std::make_unique<uv_pipe_t>();
 	int r = 0;
-	r = uv_pipe_init(that->loop_, client.get(), 0);
+	r = uv_pipe_init(that->loop_, client.get(), 1);
 	client->data = that;
 
 	std::string log = fmt::format("anIPCServer::on_new_connection--uv_pipe_init({:#08x})={}", (int)(client.get()), r);
@@ -79,8 +78,10 @@ void anIPCServer::on_read(uv_stream_t *client, ssize_t nread, const uv_buf_t *bu
 		//
 		free(buf->base);
 	}else if (nread < 0) {
-		if (!uv_is_closing((uv_handle_t*)client)) {
-			uv_close(reinterpret_cast<uv_handle_t*>(client), anIPCServer::on_close);
+		if (UV_EOF == nread) {
+			if (!uv_is_closing((uv_handle_t*)client)) {
+				uv_close(reinterpret_cast<uv_handle_t*>(client), anIPCServer::on_close);
+			}
 		}
 	}
 
@@ -89,6 +90,7 @@ void anIPCServer::on_read(uv_stream_t *client, ssize_t nread, const uv_buf_t *bu
 void anIPCServer::on_notify(uv_async_t* handle) {
 
 }
+
 void anIPCServer::on_close(uv_handle_t* handle) {
 	std::string log = fmt::format("anIPCServer::on_close({:#08x})", (int)handle);
 
@@ -103,7 +105,6 @@ void anIPCServer::on_close(uv_handle_t* handle) {
 
 	g_log->info(log);
 }
-
 
 int anIPCServer::on_message_handle(size_t len, const char* message) {
 	int r = 0;
@@ -139,12 +140,13 @@ int anIPCServer::on_message_handle(size_t len, const char* message) {
 
 	return r;
 }
+
 int anIPCServer::start(uv_loop_t * loop, std::string&& serverName) {
 	int r = 0;
 	loop_ = loop;
 	strServerName_ = std::forward<std::string>(serverName);
 
-	r = uv_pipe_init(loop_, &pipe_server_, 0);
+	r = uv_pipe_init(loop_, &pipe_server_, 1);
 	if (r) {
 		g_log->info("anIPCServer::start-- uv_pipe_init()={},errstr={}", r, (r ? uv_strerror(r) : "success"));
 		return r;

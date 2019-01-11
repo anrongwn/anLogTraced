@@ -6,11 +6,8 @@
 anIPCClient::anIPCClient()
 {
 	uv_handle_set_data((uv_handle_t*)&pipe_, this);
-	uv_handle_set_data((uv_handle_t*)&loop_, this);
+	uv_loop_set_data(&loop_, this);
 	uv_handle_set_data((uv_handle_t*)&connect_, this);
-	//pipe_.data = this;
-	//loop_.data = this;
-	//connect_.data = this;
 }
 
 
@@ -22,7 +19,7 @@ int anIPCClient::init() {
 
 	r = uv_loop_init(&loop_);
 	if (0 == r) {
-		r = uv_pipe_init(&loop_, &pipe_, 0);
+		r = uv_pipe_init(&loop_, &pipe_, 1);
 	}
 	return r;
 }
@@ -56,7 +53,9 @@ int anIPCClient::start(const std::string& logname) {
 int anIPCClient::stop() {
 	int r = 0;
 	std::lock_guard<std::mutex> lock(mtx_);
-	if (std::atomic_exchange(&this->flag_, true)) return 0;
+
+	if (!thread_.joinable()) return 0;
+	//if (std::atomic_exchange(&this->flag_, true)) return 0;
 
 	/*
 	if (!uv_is_closing((uv_handle_t*)&connect_)) {
@@ -71,11 +70,14 @@ int anIPCClient::stop() {
 	}
 	*/
 
-	if (!uv_is_closing((uv_handle_t*)&pipe_)) {
-		uv_close((uv_handle_t*)&pipe_, nullptr);
-	}
+	//uv_close((uv_handle_t*)&connect_, nullptr);
+	uv_close((uv_handle_t*)&pipe_, nullptr);
+	//uv_close((uv_handle_t*)&process_req_, nullptr);
+
 	uv_stop(&loop_);
 	
+	std::atomic_exchange(&this->flag_, true);
+	std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
 	if (thread_.joinable()) {
 		thread_.join();
@@ -91,10 +93,11 @@ int anIPCClient::stop() {
 void anIPCClient::connect_impl() {
 	std::string strPipeName(AN_PIPE_SERVER_NAME_PREFIX);
 	strPipeName += strlogname_;
-	connect_.data = this;
-
+	uv_handle_set_data((uv_handle_t*)&connect_, this);
+	
 	uv_pipe_connect(&connect_, &pipe_, strPipeName.c_str(), anIPCClient::on_new_connect);
 }
+
 int anIPCClient::connect() {
 	int r = 0;
 
@@ -118,48 +121,57 @@ int anIPCClient::connect() {
 void anIPCClient::on_new_connect(uv_connect_t * req, int status) {
 	anIPCClient * that = reinterpret_cast<anIPCClient*>( uv_handle_get_data((uv_handle_t*)req) );
 
-	if (status) {
-		//启动服务
-		int r = that->wait_.get_count();
-		if (0 == that->wait_.get_count()) {
-			char* args[3];
+	if (status) 
+	{
+		//
+		if (UV_ENOENT == status) {
+			//启动服务
+			int r = that->wait_.get_count();
+			if (0 == that->wait_.get_count()) {
+				char* args[3];
 #ifdef _DEBUG
-			args[0] = R"(D:\MyTest\2018_C++\anLogTraced\Debug\anLogServer.exe)";
+				args[0] = R"(D:\MyTest\2018_C++\anLogTraced\Debug\anLogServer.exe)";
 #else
-			args[0] = R"(D:\MyTest\2018_C++\anLogTraced\Release\anLogServer.exe)";
+				args[0] = R"(D:\MyTest\2018_C++\anLogTraced\Release\anLogServer.exe)";
 #endif
-			args[1] = "anSPTrace";
-			args[2] = NULL;
+				args[1] = "anSPTrace";
+				args[2] = NULL;
 
-			uv_process_options_t options;
-			options.exit_cb = NULL;
+				uv_process_options_t options;
+				options.exit_cb = NULL;
 #ifdef _DEBUG
-			options.cwd  = R"(D:\MyTest\2018_C++\anLogTraced\Debug)";
+				options.cwd = R"(D:\MyTest\2018_C++\anLogTraced\Debug)";
 #else
-			options.cwd = R"(D:\MyTest\2018_C++\anLogTraced\Release)";
+				options.cwd = R"(D:\MyTest\2018_C++\anLogTraced\Release)";
 #endif
-			options.args = args;
+				options.args = args;
 
-			options.file = args[0];
-			options.flags = UV_PROCESS_DETACHED| UV_PROCESS_WINDOWS_HIDE;
-			options.env = nullptr;
-			options.stdio_count = 0;
+				options.file = args[0];
+				options.flags = UV_PROCESS_DETACHED | UV_PROCESS_WINDOWS_HIDE;
+				options.env = nullptr;
+				options.stdio_count = 0;
 
-			
-			int r = uv_spawn(&that->loop_, &that->process_req_, &options);
-			if (r) {
-				g_log->info("anIPCClient::on_new_connect--uv_spawn({})={}, errstr={}", options.file, r, uv_strerror(r));
-				//return;
+
+				int r = uv_spawn(&that->loop_, &that->process_req_, &options);
+				if (r) {
+					g_log->info("anIPCClient::on_new_connect--uv_spawn({})={}, errstr={}", options.file, r, uv_strerror(r));
+					//return;
+				}
+				uv_unref((uv_handle_t *)&that->process_req_);
 			}
-			uv_unref((uv_handle_t *)&that->process_req_);
-		}
-		//::Sleep(10);
-		std::this_thread::sleep_for(std::chrono::microseconds(10));
+			//::Sleep(10);
+			std::this_thread::sleep_for(std::chrono::microseconds(10));
 
-		//重连
-		that->connect_impl();
-		that->wait_.signal_once();
-		
+			//重连
+			that->connect_impl();
+			that->wait_.signal_once();
+
+		}
+
+		//
+		if (UV_EOF == status) {
+			uv_close((uv_handle_t*)req, nullptr);
+		}
 	}
 	else if (0 == status) {
 		g_log->info("anIPCClient::on_new_connect({:08x}, {}) succeed.", (int)req, status);
@@ -184,7 +196,7 @@ void anIPCClient::on_close(uv_handle_t* handle) {
 		if ((&that->pipe_) == (void*)(handle))
 		{
 			//防此线程退出后，还可以joinable
-			that->thread_.detach();
+			//that->thread_.detach();
 		}
 
 	}
@@ -204,7 +216,10 @@ void anIPCClient::run(void * arg) {
 
 	int r = 0;
 	while (true) {
-		if ((that->flag_)&&(0==r)) break;	//退出标志为true 和没有 io 处理
+		if ((that->flag_) && (0 == r))
+		{
+			break;	//退出标志为true 和没有 io 处理
+		}
 
 		r = uv_run(&that->loop_, UV_RUN_NOWAIT);
 
