@@ -8,6 +8,7 @@
 
 //本志日志
 anlog::logger &g_log = anlog::init("anLogClient");
+//anlog::logger &g_log = anlog::init("anLogServer");
 
 #ifdef _DEBUG
 #pragma comment(lib, "..//deps//lib//libuv//debug//libuv.lib")

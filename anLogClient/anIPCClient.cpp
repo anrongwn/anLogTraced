@@ -231,8 +231,8 @@ void anIPCClient::run(void * arg) {
 	//处理还未能关闭的handle，防止内存泄漏
 	do {
 		r = uv_loop_close(&that->loop_);
-		if (r) {
-			uv_run(&that->loop_, UV_RUN_ONCE);
+		if (UV_EBUSY==r) {
+			uv_run(&that->loop_, UV_RUN_NOWAIT);
 		}
 		g_log->info("anIPCClient::run() exit. uv_loop_close()={}", r);
 	} while (r);
