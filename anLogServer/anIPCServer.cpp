@@ -101,10 +101,10 @@ void anIPCServer::on_close(uv_handle_t* handle) {
 		anIPCServer * that = reinterpret_cast<anIPCServer *>(handle->data);
 		that->clients_->remove(reinterpret_cast<uv_pipe_t*>(handle));
 		
-		//退出
+		//通知退出
 		if (0 == that->clients_->get_count()) {
 			that->stop();
-			g_log->info("clients size=0, stop().");
+			g_log->info("clients size = 0, send stop() requst.");
 		}
 	}
 
