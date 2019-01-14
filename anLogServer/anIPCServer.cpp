@@ -156,6 +156,8 @@ int anIPCServer::wait_exit() {
 		g_log->info("anIPCServer::wait_exit(). uv_loop_close()={}", r);
 	} while (r);
 
+	loop_ = nullptr;
+
 	return r;
 }
 int anIPCServer::run() {

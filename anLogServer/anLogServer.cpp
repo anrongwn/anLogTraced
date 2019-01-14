@@ -69,11 +69,11 @@ int main(int argc, char *argv[], char *envp[])
 
 	//¿ªÆôuv_run
 	r = g_server->run();
-	g_log->info("g_server->run() exit. r={}", r);
+	g_log->info("main::g_server->run() exit. r={}", r);
 
 	//·ÀÖ¹ÄÚ´æÐ¹Â©
 	r = g_server->wait_exit();
-	g_log->info("g_server->wait_exit() completed. r={}", r);
+	g_log->info("main::g_server->wait_exit() completed. r={}", r);
 
 #ifdef _DEBUG
 	//system("pause");
