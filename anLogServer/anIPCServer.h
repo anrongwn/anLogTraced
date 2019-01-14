@@ -28,6 +28,10 @@ public:
 		list_.remove_if([&](std::list<client_item>::reference ref) {
 			return (ref.get() == handle); });
 	}
+
+	size_t get_count() {
+		return list_.size();
+	}
 private:
 	std::list<client_item> list_;
 	class anIPCServer * host_ = { nullptr };
@@ -40,8 +44,10 @@ public:
 	anIPCServer();
 	~anIPCServer();
 
-	int start(uv_loop_t * loop, std::string&& serverName);
+	int start(std::string&& serverName);
 	int stop();
+	int run();
+	int wait_exit();
 private:
 	static void on_new_connection(uv_stream_t* server, int status);
 	static void alloc_buffer(uv_handle_t * handle, size_t suggested_size, uv_buf_t * buf);

@@ -5,7 +5,7 @@
 #include <memory>
 #include <iostream>
 #include <random>
-#include "../utility/uvloop2.h"
+//#include "../utility/uvloop2.h"
 #include "anIPCServer.h"
 
 #ifdef _DEBUG
@@ -16,7 +16,7 @@
 #define AN_PIPE_SERVER_NAME_PREFIX	R"(\\?\pipe\)"
 
 //全局uvloop
-std::unique_ptr<uvloop2> g_loop = std::make_unique<uvloop2>();
+//std::unique_ptr<uvloop2> g_loop = std::make_unique<uvloop2>();
 
 //全局pipe_server
 std::unique_ptr<anIPCServer> g_server = std::make_unique<anIPCServer>();
@@ -62,13 +62,17 @@ int main(int argc, char *argv[], char *envp[])
 	g_msgHandler.init(R"(D:\MyTest\2018_C++\anLogTraced\logs)", serverName, R"(.ktlog)");
 
 	//启动pipe_server
-	r = g_server->start(g_loop->get(), std::string(AN_PIPE_SERVER_NAME_PREFIX) + serverName);
+	r = g_server->start( std::string(AN_PIPE_SERVER_NAME_PREFIX) + serverName);
 	if (r) {
 		return r;
 	}
 
 	//开启uv_run
-	r = g_loop->run();
+	r = g_server->run();
+	g_log->info("g_server->run() exit. r={}", r);
+
+	//防止内存泄漏
+	r = g_server->wait_exit();
 
 #ifdef _DEBUG
 	//system("pause");

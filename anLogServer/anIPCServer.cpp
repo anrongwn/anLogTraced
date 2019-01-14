@@ -11,7 +11,6 @@ anIPCServer::anIPCServer()
 
 anIPCServer::~anIPCServer()
 {
-	stop();
 }
 
 void anIPCServer::on_new_connection(uv_stream_t* server, int status) {
@@ -101,6 +100,12 @@ void anIPCServer::on_close(uv_handle_t* handle) {
 		//从连接中清除
 		anIPCServer * that = reinterpret_cast<anIPCServer *>(handle->data);
 		that->clients_->remove(reinterpret_cast<uv_pipe_t*>(handle));
+		
+		//退出
+		if (0 == that->clients_->get_count()) {
+			that->stop();
+			g_log->info("clients size=0, stop().");
+		}
 	}
 
 	g_log->info(log);
@@ -141,9 +146,33 @@ int anIPCServer::on_message_handle(size_t len, const char* message) {
 	return r;
 }
 
-int anIPCServer::start(uv_loop_t * loop, std::string&& serverName) {
+int anIPCServer::wait_exit() {
 	int r = 0;
-	loop_ = loop;
+	do {
+		r = uv_loop_close(loop_);
+		if (UV_EBUSY == r) {
+			uv_run(loop_, UV_RUN_NOWAIT);
+		}
+
+		g_log->info("anIPCServer::wait_exit(). uv_loop_close()={}", r);
+	} while (r);
+
+	return r;
+}
+int anIPCServer::run() {
+	int r = 0;
+
+	r = uv_run(loop_, UV_RUN_DEFAULT);
+	
+	//g_log->info("anIPCServer::run() exit. uv_loop_close()={}", r);
+	return r;
+}
+int anIPCServer::start(std::string&& serverName) {
+	int r = 0;
+
+	loop_ = uv_default_loop();
+	uv_loop_set_data(loop_, this);
+
 	strServerName_ = std::forward<std::string>(serverName);
 
 	r = uv_pipe_init(loop_, &pipe_server_, 0);
@@ -172,7 +201,11 @@ int anIPCServer::start(uv_loop_t * loop, std::string&& serverName) {
 }
 int anIPCServer::stop() {
 	int r = 0;
-
+	
+	uv_close((uv_handle_t*)&pipe_server_, nullptr);
+	uv_unref((uv_handle_t*)&pipe_server_);
+	uv_stop(loop_);
+	
 	message_enginer_->stop();
 	return r;
 }
