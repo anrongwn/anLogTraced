@@ -143,7 +143,6 @@ int anIPCServer::on_message_handle(size_t len, const char* message) {
 
 	return r;
 
-	return r;
 }
 
 int anIPCServer::wait_exit() {

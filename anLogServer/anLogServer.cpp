@@ -73,6 +73,7 @@ int main(int argc, char *argv[], char *envp[])
 
 	//·ÀÖ¹ÄÚ´æÐ¹Â©
 	r = g_server->wait_exit();
+	g_log->info("g_server->wait_exit() completed. r={}", r);
 
 #ifdef _DEBUG
 	//system("pause");
