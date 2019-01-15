@@ -151,6 +151,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\anMessageEngine\anMee.h" />
+    <ClInclude Include="..\utility\anlog.h" />
     <ClInclude Include="..\utility\uvloop2.h" />
     <ClInclude Include="anIPCServer.h" />
     <ClInclude Include="anLogHandler.h" />
@@ -159,6 +160,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\anMessageEngine\anMee.cpp" />
+    <ClCompile Include="..\utility\anlog.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="anIPCServer.cpp" />
     <ClCompile Include="anLogHandler.cpp" />
     <ClCompile Include="anLogServer.cpp" />

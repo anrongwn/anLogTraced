@@ -192,6 +192,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\utility\anlog.h" />
     <ClInclude Include="..\utility\anwaitconnect.h" />
     <ClInclude Include="anIPCClient.h" />
     <ClInclude Include="anLogClient.h" />
@@ -201,6 +202,9 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\utility\anlog.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="anIPCClient.cpp" />
     <ClCompile Include="anLogClient.cpp" />
     <ClCompile Include="anLogClientDlg.cpp" />

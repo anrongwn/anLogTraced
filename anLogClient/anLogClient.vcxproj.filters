@@ -39,6 +39,9 @@
     <ClInclude Include="..\utility\anwaitconnect.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="..\utility\anlog.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="anLogClient.cpp">
@@ -51,6 +54,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="anIPCClient.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\utility\anlog.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
