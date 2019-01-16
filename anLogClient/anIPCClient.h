@@ -60,6 +60,7 @@ private:
 	static void on_notify(uv_async_t* handle);
 	static void on_close(uv_handle_t* handle);
 	static void on_write(uv_write_t * req, int status);
+	static void on_walk(uv_handle_t* handle, void* arg);
 
 	int init();
 	void connect_impl();

@@ -145,8 +145,17 @@ int anIPCServer::on_message_handle(size_t len, const char* message) {
 
 }
 
+void anIPCServer::on_walk(uv_handle_t* handle, void* arg) {
+	if (!uv_is_closing(handle)) {
+		uv_close(handle, nullptr);
+	}
+}
+
 int anIPCServer::wait_exit() {
 	int r = 0;
+
+	uv_walk(loop_, anIPCServer::on_walk, nullptr);
+	uv_run(loop_, UV_RUN_DEFAULT);
 	do {
 		r = uv_loop_close(loop_);
 		if (UV_EBUSY == r) {

@@ -129,7 +129,7 @@ void anIPCClient::on_new_connect(uv_connect_t * req, int status) {
 				args[1] = "anSPTrace";
 				args[2] = NULL;
 
-				uv_process_options_t options;
+				uv_process_options_t options = {0x00};
 				options.exit_cb = NULL;
 #ifdef _DEBUG
 				options.cwd = R"(D:\MyTest\2018_C++\anLogTraced\Debug)";
@@ -209,6 +209,11 @@ void anIPCClient::on_write(uv_write_t * req, int status) {
 
 	delete handle;
 }
+void anIPCClient::on_walk(uv_handle_t* handle, void* arg) {
+	if (!uv_is_closing(handle)) {
+		uv_close(handle, nullptr);
+	}
+}
 void anIPCClient::run(void * arg) {
 	anIPCClient * that = reinterpret_cast<anIPCClient*>(arg);
 
@@ -229,6 +234,8 @@ void anIPCClient::run(void * arg) {
 	}
 
 	//处理还未能关闭的handle，防止内存泄漏
+	uv_walk(&that->loop_, anIPCClient::on_walk, nullptr);
+	uv_run(&that->loop_, UV_RUN_DEFAULT);
 	do {
 		r = uv_loop_close(&that->loop_);
 		if (UV_EBUSY==r) {

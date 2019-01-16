@@ -56,6 +56,7 @@ private:
 	static void on_read(uv_stream_t *client, ssize_t nread, const uv_buf_t *buf);
 	static void on_notify(uv_async_t* handle);
 	static void on_close(uv_handle_t* handle);
+	static void on_walk(uv_handle_t* handle, void* arg);
 
 	static int on_message_handle(size_t len, const char* message);
 private:
