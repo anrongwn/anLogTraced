@@ -47,8 +47,8 @@ void anMee::stop() {
 	//Õë¶Ô×ÔÆôuv_run
 	if ((loop_) && (engine_)) {
 		uv_stop(loop_);
-		uv_loop_close(loop_);
-		delete loop_;
+		//uv_loop_close(loop_);
+		//delete loop_;
 		
 	}
 	uv_thread_join(&engine_);
@@ -168,15 +168,34 @@ int anMee::message_handler(size_t len, const char* message) {
 	
 	return r;
 }
+
+void anMee::on_walk(uv_handle_t* handle, void* arg) {
+	if (!uv_is_closing(handle)) {
+		uv_close(handle, nullptr);
+	}
+}
 void anMee::thread_func(void * lp) {
 	anMee * that = static_cast<anMee*>(lp);
 	
 	if (std::atomic_exchange(&that->flag_, true)) return;
 	
+	//main run message loop
 	int more = 0;
 	while (that->flag_) {
 		more = uv_run(that->loop_, UV_RUN_NOWAIT);
 		if (more) continue;
 	}
 
+	//fully close handle
+	uv_walk(that->loop_, anMee::on_walk, nullptr);
+	uv_run(that->loop_, UV_RUN_DEFAULT);
+	do {
+		more = uv_loop_close(that->loop_);
+		if (UV_EBUSY == more) {
+			uv_run(that->loop_, UV_RUN_NOWAIT);
+		}
+	} while (more);
+
+	//
+	delete that->loop_;
 }

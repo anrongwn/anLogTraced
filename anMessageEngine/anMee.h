@@ -55,6 +55,7 @@ private:
 	static void notify_handler(uv_async_t* handle);
 	static int message_handler(size_t len, const char* message);
 	static void close_cb(uv_handle_t* handle);
+	static void on_walk(uv_handle_t* handle, void* arg);
 private:
 	raw_buffer raw_data_v_;
 
