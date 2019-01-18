@@ -16,6 +16,7 @@ public:
 	int start();
 	int stop();
 
+	static void run(void* arg);
 private:
 	static void alloc_buffer(uv_handle_t * handle, size_t suggested_size, uv_buf_t * buf);
 	static void on_write(uv_write_t * req, int status);
@@ -38,7 +39,7 @@ private:
 	};
 
 
-	static void run(void* arg);
+	
 	int init();
 
 

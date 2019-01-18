@@ -7,9 +7,10 @@
 #include <random>
 #include "anIPC2.h"
 
-
+static anIPC2 g_ipc;
 int main(int argc, char *argv[], char *envp[])
 {
+	int r = 0;
 	/*
 	for (auto i = 0; i < argc; ++i) {
 	std::string s = fmt::format("argv[{}]={}", i, argv[i]);
@@ -30,6 +31,7 @@ int main(int argc, char *argv[], char *envp[])
 #endif
 	}
 
+	g_ipc.run(&g_ipc);
 
     return 0;
 }
