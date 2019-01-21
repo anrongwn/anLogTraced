@@ -77,6 +77,7 @@ void anIPC::on_walk(uv_handle_t* handle, void* arg) {
 }
 
 void anIPC::on_child_process_exit(uv_process_t* process, int64_t exit_status, int term_signal) {
+	anIPC * that = reinterpret_cast<anIPC *>(process->data);
 
 }
 int anIPC::init() {
@@ -196,6 +197,7 @@ int anIPC::open_child_process(const char* path) {
 
 
 	//´ò¿ª
+	uv_handle_set_data((uv_handle_t*)&process_, this);
 	r = uv_spawn(loop_, &process_, &options_);
 	if (r) {
 		return r;
