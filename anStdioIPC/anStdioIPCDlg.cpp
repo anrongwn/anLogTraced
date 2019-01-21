@@ -6,6 +6,7 @@
 #include "anStdioIPC.h"
 #include "anStdioIPCDlg.h"
 #include "afxdialogex.h"
+#include <random>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -46,7 +47,14 @@ END_MESSAGE_MAP()
 
 
 // CanStdioIPCDlg 对话框
+CanStdioIPCDlg::~CanStdioIPCDlg() {
+	if (ipc_) {
+		ipc_->stop();
 
+		delete ipc_;
+	}
+	
+}
 
 
 CanStdioIPCDlg::CanStdioIPCDlg(CWnd* pParent /*=NULL*/)
@@ -159,16 +167,20 @@ HCURSOR CanStdioIPCDlg::OnQueryDragIcon()
 void CanStdioIPCDlg::OnBnClickedButton1()
 {
 	// TODO: 在此添加控件通知处理程序代码
-	int r = ipc_.start();
+	if (nullptr == ipc_) {
+		ipc_ = new anIPC();
+	}
+
+	int r = ipc_->start();
 	if (r) return;
 
 #ifdef _DEBUG
-	const char * app = R"(D:\MyTest\2018_C++\anLogTraced\Debug\)";
+	const char * app = R"(D:\MyTest\2018_C++\anLogTraced\Debug\anStdioIPC2.exe)";
 #else
-	const char * app = R"(D:\MyTest\2018_C++\anLogTraced\Debug\)";
+	const char * app = R"(D:\MyTest\2018_C++\anLogTraced\Release\anStdioIPC2.exe)";
 #endif
 
-	r = ipc_.open_child_process(app);
+	r = ipc_->open_child_process(app);
 	if (0 == r) {
 		this->GetDlgItem(IDC_BUTTON1)->EnableWindow(FALSE);
 
@@ -184,8 +196,42 @@ void CanStdioIPCDlg::OnBnClickedButton1()
 void CanStdioIPCDlg::OnBnClickedButton2()
 {
 	// TODO: 在此添加控件通知处理程序代码
-	UpdateData(TRUE);
+	if (nullptr == ipc_) {
+		return;
+	}
 
+	UpdateData(TRUE);
+	int r = 0;
+
+	std::default_random_engine re;
+	std::default_random_engine re2;
+	std::uniform_int_distribution<unsigned> u(0, 5);
+	char level = 0x31;
+
+	SYSTEMTIME st = { 0x00 };
+	char date_tmp[24] = { 0x00 };
+
+	//得到当时间
+	::GetLocalTime(&st);
+	sprintf_s(date_tmp, "%04d-%02d-%02d %02d:%02d:%02d.%03d", st.wYear, st.wMonth, \
+		st.wDay, st.wHour, st.wMinute, st.wSecond, st.wMilliseconds);
+
+	level = 0x30 + u(re);
+	std::vector<char> v;
+	//v.push_back(level);
+	v.push_back('*');
+	v.insert(v.end(), date_tmp, date_tmp + 23);
+	CString data;
+	this->GetDlgItem(IDC_EDIT1)->GetWindowTextA(data);
+	v.push_back('-');
+	v.insert(v.end(), data.operator LPCSTR(), data.operator LPCSTR() + data.GetLength());
+	v.push_back('*');
+
+	std::string id = std::to_string(re2());
+	v.insert(v.end(), id.begin(), id.end());
+
+	
+	r = ipc_->write(level, v.data(), v.size());
 
 
 }

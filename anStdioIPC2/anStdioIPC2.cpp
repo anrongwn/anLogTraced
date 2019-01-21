@@ -8,9 +8,14 @@
 #include "anIPC2.h"
 
 static anIPC2 g_ipc;
+#define	LOGNAME	R"(anStdioIPC2)"
+
 int main(int argc, char *argv[], char *envp[])
 {
 	int r = 0;
+
+	//初始化日志
+	init_log(LOGNAME);
 	/*
 	for (auto i = 0; i < argc; ++i) {
 	std::string s = fmt::format("argv[{}]={}", i, argv[i]);
@@ -33,6 +38,8 @@ int main(int argc, char *argv[], char *envp[])
 
 	g_ipc.run(&g_ipc);
 
+
+	close_log(LOGNAME);
     return 0;
 }
 

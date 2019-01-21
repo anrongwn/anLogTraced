@@ -9,6 +9,7 @@
 
 anIPC::anIPC()
 {
+	init();
 }
 
 
@@ -34,7 +35,10 @@ void anIPC::on_read(uv_stream_t *client, ssize_t nread, const uv_buf_t *buf) {
 
 	anIPC * that = reinterpret_cast<anIPC *>(client->data);
 	if (nread > 0) {
-		
+		std::string echo(buf->base, nread);
+
+
+
 		free(buf->base);
 	}
 	else if (nread < 0) {
@@ -101,17 +105,20 @@ void anIPC::run(void* arg) {
 	int r = 0;
 
 	//初始化
-	r = that->init();
-	if (r) return;
+	//r = that->init();
+	//if (r) return;
 
 	//主消息处理
 	while (true) {
-		if ((that->flag_) && (0 == r))
+		//if ((that->flag_) && (0 == r))
+		if ((that->flag_) )
 		{
 			break;	//退出标志为true 和没有 io 处理
 		}
 		r = uv_run(that->loop_, UV_RUN_NOWAIT);
 		//g_log->info("anIPCClient::run()--uv_run(UV_RUN_DEFAULT)={}", r);
+
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 	}
 
 	//处理还未能关闭的handle，防止内存泄漏
@@ -184,6 +191,9 @@ int anIPC::open_child_process(const char* path) {
 	options_.stdio[1].flags = static_cast<uv_stdio_flags>(UV_CREATE_PIPE | UV_WRITABLE_PIPE);
 	options_.stdio[1].data.stream = (uv_stream_t*)&stdout_;
 	options_.stdio_count = 2;
+	options_.flags |= UV_PROCESS_WINDOWS_HIDE;
+	options_.flags |= UV_PROCESS_DETACHED;
+
 
 	//打开
 	r = uv_spawn(loop_, &process_, &options_);
@@ -219,7 +229,6 @@ int anIPC::write(const char level, const char *data, size_t len) {
 		//free 
 		if (req->buf.base) free(req->buf.base);
 		delete req;
-
 	}
 
 	return r;

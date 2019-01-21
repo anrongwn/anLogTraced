@@ -5,6 +5,7 @@
 #include <atomic>
 #include <sstream>
 #include <vector>
+#include <string>
 
 class anIPC2 : private an::NoCopyable
 {
@@ -41,6 +42,8 @@ private:
 
 	
 	int init();
+
+	int read_start();
 
 
 	//°ü³¤¶È

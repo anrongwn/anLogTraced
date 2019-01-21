@@ -17,6 +17,8 @@ public:
 	int start();
 	int stop();
 	int open_child_process(const char* path);
+	int write(const char level, const char *data, size_t len);
+
 private:
 	static void alloc_buffer(uv_handle_t * handle, size_t suggested_size, uv_buf_t * buf);
 	static void on_write(uv_write_t * req, int status);
@@ -54,7 +56,7 @@ private:
 	|*****lenght*****|***level+data***|
 	*/
 	void pack(const char level, const char *data, size_t len, raw_buffer& message);
-	int write(const char level, const char *data, size_t len);
+	
 private:
 	uv_loop_t* loop_ = {nullptr};
 	uv_process_options_t options_ = {0x00};

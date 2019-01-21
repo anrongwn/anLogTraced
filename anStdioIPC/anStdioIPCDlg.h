@@ -11,6 +11,7 @@ class CanStdioIPCDlg : public CDialogEx
 // 构造
 public:
 	CanStdioIPCDlg(CWnd* pParent = NULL);	// 标准构造函数
+	~CanStdioIPCDlg();
 
 // 对话框数据
 #ifdef AFX_DESIGN_TIME
@@ -36,5 +37,5 @@ public:
 	afx_msg void OnBnClickedButton2();
 
 private:
-	anIPC ipc_;
+	anIPC * ipc_;
 };
