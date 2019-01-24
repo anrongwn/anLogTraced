@@ -142,7 +142,10 @@ void anIPCClient::on_new_connect(uv_connect_t * req, int status) {
 				options.flags = UV_PROCESS_DETACHED | UV_PROCESS_WINDOWS_HIDE;
 				options.env = nullptr;
 				options.stdio_count = 0;
-
+				
+				
+				//½ûÖ¹×Ó½ø³Ì¼Ì³Ð
+				uv_disable_stdio_inheritance();
 
 				int r = uv_spawn(&that->loop_, &that->process_req_, &options);
 				if (r) {
