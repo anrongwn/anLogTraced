@@ -76,13 +76,36 @@ END_MESSAGE_MAP()
 
 
 // CanLogClientDlg 消息处理程序
+/*
+int test(int v) {
+	v--;
+
+	if (v <= 0)return 0;
+
+	return test(v) + v;
+}
+
+char * test2(char **p, size_t len) {
+	(*p) = (char *)malloc(len);
+	memset((*p), 0x00, len);
+
+	return (*p);
+}
+*/
 
 BOOL CanLogClientDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
 
 	// 将“关于...”菜单项添加到系统菜单中。
+	/*
+	int v = 10;
+	int sum = test(v);
 
+	char * pstr = nullptr;
+	char * pp = test2(&pstr, 100);
+	free(pstr);
+	*/
 	// IDM_ABOUTBOX 必须在系统命令范围内。
 	ASSERT((IDM_ABOUTBOX & 0xFFF0) == IDM_ABOUTBOX);
 	ASSERT(IDM_ABOUTBOX < 0xF000);
