@@ -93,14 +93,38 @@ char * test2(char **p, size_t len) {
 }
 */
 
+struct vnode {
+	DWORD dwdata;
+	WORD wdata;
+	struct vnode * left;
+	struct vnode * right;
+};
+
+typedef struct _anGUID {
+	unsigned long  Data1;
+	unsigned short Data2;
+	unsigned short Data3;
+	unsigned char  Data4[8];
+} anGUID;
+
+
 BOOL CanLogClientDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
+
+	size_t s = sizeof WORD;
+	s = sizeof DWORD;
+
+	char str[] = "ghghghghghghghghghghgh";
+
+	size_t len = sizeof str;
+	len = strlen(str);
 
 	// 将“关于...”菜单项添加到系统菜单中。
 	/*
 	int v = 10;
 	int sum = test(v);
+
 
 	char * pstr = nullptr;
 	char * pp = test2(&pstr, 100);
